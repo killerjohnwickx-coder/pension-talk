@@ -1,4 +1,4 @@
-# 펜션톡 (PensionTalk) — 숙박업 외국인 응대 통역 PWA
+# 숙소톡 (PensionTalk) — 숙박업 외국인 응대 통역 PWA
 
 숙박업 사장님의 든든한 통역 파트너
 
