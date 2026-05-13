@@ -796,9 +796,11 @@ function startConvVoice(side){
     for(let i=e.resultIndex;i<e.results.length;i++){transcript+=e.results[i][0].transcript;}
     textEl.textContent=transcript;
     if(e.results[e.results.length-1].isFinal){
-      const translated=pensionTranslate(transcript,langCode,otherLangCode);
-      otherTextEl.textContent=translated;
-      addConvHistory(transcript,translated,langCode,otherLangCode);
+      otherTextEl.textContent='번역 중…';
+      pensionTranslate(transcript,langCode,otherLangCode).then(translated=>{
+        otherTextEl.textContent=translated;
+        addConvHistory(transcript,translated,langCode,otherLangCode);
+      });
     }
   };
   rec.onerror=function(e){
@@ -812,7 +814,25 @@ function startConvVoice(side){
   rec.start();
 }
 
-function pensionTranslate(text,fromLang,toLang){
+// 5/13 fix: 외부 번역 API (MyMemory 무료·인증 X·1일 5,000자) 통합 — 일부 단어만 번역되던 문제 해결
+async function fetchTranslate(text, fromLang, toLang){
+  try {
+    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${fromLang}|${toLang}`;
+    const res = await fetch(url, { method: 'GET' });
+    if(!res.ok) return null;
+    const data = await res.json();
+    if(data && data.responseData && data.responseData.translatedText){
+      const t = data.responseData.translatedText;
+      // MyMemory가 동일 텍스트 반환 시 (번역 실패) null
+      if(t.trim().toLowerCase() === text.trim().toLowerCase()) return null;
+      return t;
+    }
+    return null;
+  } catch(e){ return null; }
+}
+
+// 동기 fallback 번역 (인터넷 없을 때·DICT/TEMPLATES 기반)
+function pensionTranslateLocal(text,fromLang,toLang){
   // 1. Template exact match
   const matched=TEMPLATES.find(t=>t[fromLang]===text);
   if(matched) return matched[toLang]||text;
@@ -838,6 +858,19 @@ function pensionTranslate(text,fromLang,toLang){
     return result;
   }
   return text;
+}
+
+// 통합: 외부 API 우선·실패 시 local fallback (5/13 fix)
+async function pensionTranslate(text,fromLang,toLang){
+  if(fromLang === toLang) return text;
+  // 1. Template exact match (즉시·offline)
+  const matched=TEMPLATES.find(t=>t[fromLang]===text);
+  if(matched) return matched[toLang]||text;
+  // 2. 외부 API 시도 (MyMemory·HTTPS·무료)
+  const api = await fetchTranslate(text, fromLang, toLang);
+  if(api) return api;
+  // 3. Local fallback (TEMPLATES partial·DICT)
+  return pensionTranslateLocal(text, fromLang, toLang);
 }
 
 function speakConv(side){
@@ -883,9 +916,11 @@ function autoTranslateText(){
     if(!input){output.style.display='none';return;}
     const fromLang=document.getElementById('textFromLang').value;
     const toLang=document.getElementById('textToLang').value;
-    const translated=pensionTranslate(input,fromLang,toLang);
-    output.textContent=translated;
+    output.textContent='번역 중…';
     output.style.display='block';
+    pensionTranslate(input,fromLang,toLang).then(translated=>{
+      output.textContent=translated;
+    });
   },300);
 }
 
