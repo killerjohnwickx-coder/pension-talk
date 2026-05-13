@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="숙소톡">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2b6cb0">
+<title>숙소톡 - 숙박 소상공인 외국인 응대</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--navy:#1a365d;--blue:#2b6cb0;--blue-light:#3182ce;--blue-pale:#ebf4ff;--gray:#f7fafc;--gray-mid:#e2e8f0;--gray-dark:#718096;--white:#ffffff;--red:#e53e3e;--green:#38a169;--orange:#dd6b20;--shadow:0 2px 8px rgba(0,0,0,0.1)}
+html,body{height:100%;font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',sans-serif;background:var(--gray);color:#2d3748;overflow:hidden}
+.app{display:flex;flex-direction:column;height:100%;max-width:480px;margin:0 auto;background:var(--white);position:relative}
+header{background:var(--navy);color:var(--white);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;z-index:10;flex-shrink:0}
+header h1{font-size:18px;font-weight:700;letter-spacing:-0.5px}
+header .subtitle{font-size:11px;opacity:0.7;margin-top:2px}
+.status-bar{display:flex;align-items:center;gap:6px;font-size:11px}
+.status-dot{width:8px;height:8px;border-radius:50%;background:var(--green)}
+.status-dot.offline{background:var(--red)}
+.lang-selector{display:flex;gap:4px;padding:8px 16px;background:var(--white);border-bottom:1px solid var(--gray-mid);flex-shrink:0}
+.lang-btn{flex:1;padding:8px 4px;border:2px solid var(--gray-mid);border-radius:8px;background:var(--white);font-size:13px;cursor:pointer;text-align:center;transition:all 0.2s}
+.lang-btn.active{border-color:var(--blue);background:var(--blue-pale);color:var(--blue);font-weight:700}
+.content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:70px}
+.tab-content{display:none;animation:fadeIn 0.25s ease}
+.tab-content.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.home-hero{padding:24px 16px;text-align:center;background:linear-gradient(135deg,var(--navy),var(--blue));color:var(--white);border-radius:0 0 20px 20px}
+.home-hero h2{font-size:22px;margin-bottom:8px}
+.home-hero p{font-size:13px;opacity:0.85;line-height:1.5}
+.home-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:16px}
+.stat-card{background:var(--white);border:1px solid var(--gray-mid);border-radius:12px;padding:16px;text-align:center;box-shadow:var(--shadow)}
+.stat-card .num{font-size:28px;font-weight:800;color:var(--blue)}
+.stat-card .label{font-size:12px;color:var(--gray-dark);margin-top:4px}
+.quick-actions{padding:0 16px 16px}
+.quick-actions h3{font-size:15px;font-weight:700;margin-bottom:12px;color:var(--navy)}
+.quick-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.quick-item{background:var(--blue-pale);border-radius:12px;padding:14px 8px;text-align:center;cursor:pointer;transition:transform 0.15s,box-shadow 0.15s}
+.quick-item:active{transform:scale(0.95)}
+.quick-item .icon{font-size:24px;margin-bottom:6px}
+.quick-item .text{font-size:11px;color:var(--navy);font-weight:600}
+.category-tabs{display:flex;gap:6px;padding:12px 16px;overflow-x:auto;flex-shrink:0;-webkit-overflow-scrolling:touch}
+.category-tabs::-webkit-scrollbar{display:none}
+.cat-btn{white-space:nowrap;padding:8px 14px;border-radius:20px;border:1px solid var(--gray-mid);background:var(--white);font-size:12px;cursor:pointer;transition:all 0.2s;flex-shrink:0}
+.cat-btn.active{background:var(--blue);color:var(--white);border-color:var(--blue);font-weight:700}
+.template-list{padding:0 16px 16px}
+.template-card{background:var(--white);border:1px solid var(--gray-mid);border-radius:12px;padding:14px;margin-bottom:10px;box-shadow:var(--shadow);transition:transform 0.15s}
+.template-card:active{transform:scale(0.98)}
+.template-ko{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:6px}
+.template-trans{font-size:13px;color:#4a5568;line-height:1.5}
+.template-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.tmpl-btn{display:flex;align-items:center;gap:4px;padding:6px 12px;border-radius:16px;border:1px solid var(--gray-mid);background:var(--gray);font-size:11px;cursor:pointer;transition:all 0.15s}
+.tmpl-btn:active{background:var(--blue-pale);border-color:var(--blue)}
+.tmpl-btn.speak{background:var(--blue);color:var(--white);border-color:var(--blue)}
+.voice-section{padding:16px}
+.voice-display{background:var(--white);border:1px solid var(--gray-mid);border-radius:16px;padding:20px;min-height:200px;margin-bottom:16px;box-shadow:var(--shadow)}
+.voice-label{font-size:12px;color:var(--gray-dark);margin-bottom:8px;font-weight:600}
+.voice-text{font-size:16px;line-height:1.6;min-height:40px;color:#2d3748}
+.voice-text.placeholder{color:var(--gray-dark);font-style:italic}
+.voice-result{margin-top:16px;padding-top:16px;border-top:1px solid var(--gray-mid)}
+.voice-controls{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.voice-ctrl-btn{padding:10px 20px;border-radius:24px;border:2px solid var(--blue);background:var(--white);color:var(--blue);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s}
+.voice-ctrl-btn:active{background:var(--blue);color:var(--white)}
+.voice-ctrl-btn.danger{border-color:var(--red);color:var(--red)}
+.voice-ctrl-btn.danger:active{background:var(--red);color:var(--white)}
+.mic-float{position:fixed;bottom:85px;left:50%;transform:translateX(-50%);width:64px;height:64px;border-radius:50%;background:var(--blue);color:var(--white);border:none;font-size:28px;cursor:pointer;box-shadow:0 4px 16px rgba(43,108,176,0.4);z-index:20;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
+.mic-float:active{transform:translateX(-50%) scale(0.9)}
+.mic-float.recording{background:var(--red);animation:pulse 1.2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(229,62,62,0.4)}50%{box-shadow:0 0 0 16px rgba(229,62,62,0)}}
+.pension-section{padding:16px}
+.pension-card{background:var(--white);border:1px solid var(--gray-mid);border-radius:16px;padding:16px;margin-bottom:12px;box-shadow:var(--shadow)}
+.pension-name{font-size:17px;font-weight:800;color:var(--navy);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.pension-badge{font-size:10px;background:var(--blue);color:var(--white);padding:2px 8px;border-radius:10px}
+.pension-loc{font-size:12px;color:var(--gray-dark);margin-bottom:8px}
+.pension-features{display:flex;flex-wrap:wrap;gap:6px}
+.pension-tag{font-size:11px;background:var(--blue-pale);color:var(--blue);padding:4px 10px;border-radius:12px}
+.pension-desc{font-size:13px;color:#4a5568;margin-top:8px;line-height:1.5}
+.history-section{padding:16px}
+.history-item{background:var(--white);border:1px solid var(--gray-mid);border-radius:12px;padding:12px;margin-bottom:8px}
+.history-time{font-size:11px;color:var(--gray-dark)}
+.history-text{font-size:14px;margin-top:4px}
+.history-trans{font-size:13px;color:var(--blue);margin-top:4px}
+.empty-state{text-align:center;padding:40px 20px;color:var(--gray-dark)}
+.empty-state .icon{font-size:48px;margin-bottom:12px}
+.empty-state p{font-size:14px;line-height:1.6}
+nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--white);border-top:1px solid var(--gray-mid);display:flex;z-index:30;padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;padding:10px 0 8px;border:none;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px;color:var(--gray-dark);transition:color 0.2s}
+nav button.active{color:var(--blue)}
+nav button .nav-icon{font-size:20px}
+.toast{position:fixed;top:70px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.85);color:var(--white);padding:10px 20px;border-radius:24px;font-size:13px;z-index:100;opacity:0;transition:opacity 0.3s;pointer-events:none}
+.toast.show{opacity:1}
+.install-banner{position:fixed;bottom:70px;left:50%;transform:translateX(-50%);width:calc(100% - 32px);max-width:448px;background:var(--navy);color:var(--white);padding:14px 16px;border-radius:12px;display:none;align-items:center;justify-content:space-between;z-index:25;box-shadow:0 4px 20px rgba(0,0,0,0.3)}
+.install-banner button{padding:8px 16px;border-radius:8px;border:none;background:var(--blue-light);color:var(--white);font-weight:700;font-size:13px;cursor:pointer}
+.install-banner .close{background:none;color:var(--white);font-size:18px;padding:4px 8px}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div>
+      <h1>숙소톡</h1>
+      <div class="subtitle">숙박 소상공인 외국인 응대 도우미</div>
+    </div>
+    <div class="status-bar">
+      <div class="status-dot" id="statusDot"></div>
+      <span id="statusText">온라인</span>
+    </div>
+  </header>
+
+  <div class="lang-selector" id="langSelector" style="flex-wrap:wrap"></div>
+
+  <div class="content">
+    <!-- 홈 탭 -->
+    <div class="tab-content active" id="tabHome">
+      <div class="home-hero">
+        <h2>안녕하세요, 제이크님!</h2>
+        <p>오늘도 숙소톡과 함께<br>외국인 게스트를 편하게 응대하세요</p>
+      </div>
+      <div class="home-stats">
+        <div class="stat-card">
+          <div class="num">4</div>
+          <div class="label">운영 숙소</div>
+        </div>
+        <div class="stat-card">
+          <div class="num">3</div>
+          <div class="label">지원 언어</div>
+        </div>
+        <div class="stat-card">
+          <div class="num">6</div>
+          <div class="label">대화 카테고리</div>
+        </div>
+        <div class="stat-card">
+          <div class="num">38</div>
+          <div class="label">템플릿 문장</div>
+        </div>
+      </div>
+      <div class="quick-actions">
+        <h3>빠른 실행</h3>
+        <div class="quick-grid">
+          <div class="quick-item" onclick="goToTab('tabConv');filterCategory('checkin')">
+            <div class="icon">🔑</div>
+            <div class="text">체크인</div>
+          </div>
+          <div class="quick-item" onclick="goToTab('tabConv');filterCategory('facility')">
+            <div class="icon">🏠</div>
+            <div class="text">시설안내</div>
+          </div>
+          <div class="quick-item" onclick="goToTab('tabConv');filterCategory('claim')">
+            <div class="icon">🛠</div>
+            <div class="text">클레임</div>
+          </div>
+          <div class="quick-item" onclick="goToTab('tabConv');filterCategory('tour')">
+            <div class="icon">🗺</div>
+            <div class="text">관광안내</div>
+          </div>
+          <div class="quick-item" onclick="goToTab('tabConv');filterCategory('meal')">
+            <div class="icon">🍽</div>
+            <div class="text">식사안내</div>
+          </div>
+          <div class="quick-item" onclick="goToTab('tabConv');filterCategory('emergency')">
+            <div class="icon">🚨</div>
+            <div class="text">긴급상황</div>
+          </div>
+        </div>
+      </div>
+      <div class="history-section">
+        <h3 style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:12px">최근 대화</h3>
+        <div id="historyList">
+          <div class="empty-state">
+            <div class="icon">💬</div>
+            <p>아직 대화 기록이 없습니다.<br>음성 또는 템플릿으로 대화를 시작해보세요!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 대화 템플릿 탭 -->
+    <div class="tab-content" id="tabConv">
+      <div class="category-tabs" id="categoryTabs">
+        <button class="cat-btn active" data-cat="all" onclick="filterCategory('all')">전체</button>
+        <button class="cat-btn" data-cat="checkin" onclick="filterCategory('checkin')">🔑 체크인/아웃</button>
+        <button class="cat-btn" data-cat="facility" onclick="filterCategory('facility')">🏠 시설안내</button>
+        <button class="cat-btn" data-cat="claim" onclick="filterCategory('claim')">🛠 클레임</button>
+        <button class="cat-btn" data-cat="tour" onclick="filterCategory('tour')">🗺 관광/교통</button>
+        <button class="cat-btn" data-cat="meal" onclick="filterCategory('meal')">🍽 식사/조식</button>
+        <button class="cat-btn" data-cat="emergency" onclick="filterCategory('emergency')">🚨 긴급상황</button>
+      </div>
+      <div class="template-list" id="templateList"></div>
+    </div>
+
+    <!-- 통역 탭 (파파고 스타일) -->
+    <div class="tab-content" id="tabVoice">
+
+      <!-- 모드 선택 -->
+      <div style="display:flex;gap:6px;padding:12px 16px 8px">
+        <button class="cat-btn active" id="modeConvBtn" onclick="setTransMode('conv')" data-cat="conv" style="flex:1;text-align:center">🗣 대화 통역</button>
+        <button class="cat-btn" id="modeTextBtn" onclick="setTransMode('text')" data-cat="text" style="flex:1;text-align:center">⌨ 텍스트 번역</button>
+      </div>
+
+      <!-- 대화 통역 모드 (파파고 듀얼 화면) -->
+      <div id="convMode" style="padding:0 16px 16px">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">
+          <select id="convLang1" style="flex:1;padding:8px;border:2px solid var(--gray-mid);border-radius:8px;font-size:13px;background:var(--white)"></select>
+          <button onclick="swapConvLangs()" style="background:var(--blue);color:var(--white);border:none;width:36px;height:36px;border-radius:50%;font-size:16px;cursor:pointer">⇄</button>
+          <select id="convLang2" style="flex:1;padding:8px;border:2px solid var(--gray-mid);border-radius:8px;font-size:13px;background:var(--white)"></select>
+        </div>
+
+        <!-- 상단: 한국어 영역 -->
+        <div style="background:var(--white);border:1px solid var(--gray-mid);border-radius:12px;padding:14px;margin-bottom:8px;box-shadow:var(--shadow);position:relative;border-left:4px solid var(--blue)">
+          <div style="font-size:12px;color:var(--blue);font-weight:700;margin-bottom:6px" id="convLabel1">🇰🇷 한국어</div>
+          <div id="convText1" style="font-size:16px;min-height:50px;line-height:1.6;color:#2d3748">마이크 버튼을 눌러 말씀하세요</div>
+          <div style="display:flex;gap:6px;margin-top:8px">
+            <button onclick="speakConv(1)" class="tmpl-btn">🔊 듣기</button>
+            <button onclick="copyText(document.getElementById('convText1').textContent)" class="tmpl-btn">📋 복사</button>
+          </div>
+          <button onclick="startConvVoice(1)" id="convMic1" style="position:absolute;right:10px;top:10px;background:var(--blue);color:var(--white);border:none;width:42px;height:42px;border-radius:50%;font-size:18px;cursor:pointer;box-shadow:0 2px 8px rgba(43,108,176,0.3)">🎤</button>
+        </div>
+
+        <!-- 하단: 외국어 영역 -->
+        <div style="background:var(--white);border:1px solid var(--gray-mid);border-radius:12px;padding:14px;margin-bottom:8px;box-shadow:var(--shadow);position:relative;border-left:4px solid var(--green)">
+          <div style="font-size:12px;color:var(--green);font-weight:700;margin-bottom:6px" id="convLabel2">🇺🇸 English</div>
+          <div id="convText2" style="font-size:16px;min-height:50px;line-height:1.6;color:#2d3748">Press mic button to speak</div>
+          <div style="display:flex;gap:6px;margin-top:8px">
+            <button onclick="speakConv(2)" class="tmpl-btn">🔊 듣기</button>
+            <button onclick="copyText(document.getElementById('convText2').textContent)" class="tmpl-btn">📋 복사</button>
+          </div>
+          <button onclick="startConvVoice(2)" id="convMic2" style="position:absolute;right:10px;top:10px;background:var(--green);color:var(--white);border:none;width:42px;height:42px;border-radius:50%;font-size:18px;cursor:pointer;box-shadow:0 2px 8px rgba(56,161,105,0.3)">🎤</button>
+        </div>
+
+        <!-- 대화 히스토리 -->
+        <div style="background:var(--white);border:1px solid var(--gray-mid);border-radius:12px;padding:14px;box-shadow:var(--shadow)">
+          <div style="font-size:14px;font-weight:700;color:var(--navy);margin-bottom:8px">💬 대화 기록</div>
+          <div id="convHistory" style="max-height:180px;overflow-y:auto"><div class="empty-state" style="padding:12px"><p>대화 기록이 여기에 표시됩니다</p></div></div>
+        </div>
+      </div>
+
+      <!-- 텍스트 번역 모드 -->
+      <div id="textMode" style="display:none;padding:0 16px 16px">
+        <div style="background:var(--white);border:1px solid var(--gray-mid);border-radius:12px;padding:16px;box-shadow:var(--shadow)">
+          <div style="display:flex;gap:6px;margin-bottom:12px;align-items:center">
+            <select id="textFromLang" style="flex:1;padding:8px;border:2px solid var(--gray-mid);border-radius:8px;font-size:13px"></select>
+            <button onclick="swapTextLangs()" style="background:var(--blue);color:var(--white);border:none;width:32px;height:32px;border-radius:50%;font-size:14px;cursor:pointer">⇄</button>
+            <select id="textToLang" style="flex:1;padding:8px;border:2px solid var(--gray-mid);border-radius:8px;font-size:13px"></select>
+          </div>
+          <textarea id="textInput" rows="4" placeholder="번역할 텍스트를 입력하세요..." style="width:100%;padding:12px;border:2px solid var(--gray-mid);border-radius:8px;font-size:15px;resize:vertical;outline:none" oninput="autoTranslateText()"></textarea>
+          <div id="textOutput" style="margin-top:10px;padding:14px;background:var(--blue-pale);border-radius:8px;min-height:60px;font-size:15px;line-height:1.6;display:none"></div>
+          <div style="display:flex;gap:6px;margin-top:10px">
+            <button onclick="speakTextResult('input')" class="tmpl-btn speak" style="flex:1;justify-content:center">🔊 원문</button>
+            <button onclick="speakTextResult('output')" class="tmpl-btn speak" style="flex:1;justify-content:center">🔊 번역</button>
+            <button onclick="copyText(document.getElementById('textOutput').textContent)" class="tmpl-btn" style="flex:1;justify-content:center">📋 복사</button>
+          </div>
+        </div>
+        <div style="background:var(--white);border:1px solid var(--gray-mid);border-radius:12px;padding:14px;margin-top:8px;box-shadow:var(--shadow)">
+          <div style="font-size:14px;font-weight:700;color:var(--navy);margin-bottom:8px">💡 숙박 자주 쓰는 표현</div>
+          <div id="quickPhrases" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 숙소정보 탭 (동적 렌더링) -->
+    <div class="tab-content" id="tabPension">
+      <div class="pension-section" id="pensionList"></div>
+    </div>
+
+    <!-- 축제/맛집 탭 -->
+    <div class="tab-content" id="tabLocal">
+      <div style="padding:12px 16px 8px">
+        <div style="display:flex;gap:6px;margin-bottom:10px">
+          <input type="text" id="localRegion" placeholder="지역명 입력 (예: 군산, 세종, 전주...)" style="flex:1;padding:10px 12px;border:2px solid var(--gray-mid);border-radius:8px;font-size:14px;outline:none">
+          <button onclick="searchLocal()" style="background:var(--blue);color:var(--white);border:none;padding:10px 16px;border-radius:8px;font-size:14px;cursor:pointer;white-space:nowrap">검색</button>
+        </div>
+        <div style="display:flex;gap:6px;margin-bottom:10px">
+          <button class="cat-btn active" id="localFestBtn" onclick="setLocalMode('fest')" data-cat="fest" style="flex:1;text-align:center">🎉 축제 일정</button>
+          <button class="cat-btn" id="localFoodBtn" onclick="setLocalMode('food')" data-cat="food" style="flex:1;text-align:center">🍽 추천 맛집</button>
+        </div>
+      </div>
+
+      <!-- 축제 일정 -->
+      <div id="festMode" style="padding:0 16px 16px">
+        <div style="display:flex;gap:6px;margin-bottom:10px">
+          <button class="cat-btn active" id="festMonthBtn" onclick="setFestRange('month')">📅 이번 달</button>
+          <button class="cat-btn" id="festYearBtn" onclick="setFestRange('year')">📆 연간</button>
+        </div>
+        <div id="festResults">
+          <div class="empty-state"><div class="icon">🎉</div><p>지역을 입력하고 검색하면<br>축제 일정이 표시됩니다</p></div>
+        </div>
+      </div>
+
+      <!-- 추천 맛집 -->
+      <div id="foodMode" style="display:none;padding:0 16px 16px">
+        <div id="foodResults">
+          <div class="empty-state"><div class="icon">🍽</div><p>지역을 입력하고 검색하면<br>추천 음식점이 표시됩니다</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 설정 탭 -->
+    <div class="tab-content" id="tabSettings">
+      <div style="padding:16px">
+        <h3 style="font-size:18px;font-weight:700;color:var(--navy);margin-bottom:16px">⚙️ 숙소 설정</h3>
+        <p style="font-size:13px;color:var(--gray-dark);margin-bottom:20px">아래 정보를 수정하면 앱 전체에 자동 반영됩니다.<br>다른 숙소 사장님도 자신의 정보로 변경하여 사용할 수 있습니다.</p>
+
+        <div style="background:var(--white);border:1px solid var(--gray-mid);border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:var(--shadow)">
+          <label style="font-size:13px;font-weight:700;color:var(--navy);display:block;margin-bottom:6px">사장님 이름</label>
+          <input type="text" id="setOwnerName" style="width:100%;padding:10px 12px;border:2px solid var(--gray-mid);border-radius:8px;font-size:14px;outline:none" placeholder="제이크" oninput="saveSettings()">
+        </div>
+
+        <div style="background:var(--white);border:1px solid var(--gray-mid);border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:var(--shadow)">
+          <label style="font-size:13px;font-weight:700;color:var(--navy);display:block;margin-bottom:6px">WiFi 비밀번호</label>
+          <input type="text" id="setWifiPw" style="width:100%;padding:10px 12px;border:2px solid var(--gray-mid);border-radius:8px;font-size:14px;outline:none" placeholder="wifi1234" oninput="saveSettings()">
+        </div>
+
+        <!-- 숙소 개별 설정 (4개) -->
+        <div style="margin-top:20px;margin-bottom:8px">
+          <h4 style="font-size:16px;font-weight:700;color:var(--navy)">🏡 숙소 정보 관리</h4>
+          <p style="font-size:12px;color:var(--gray-dark);margin-top:4px">각 숙소 정보를 수정하면 숙소정보 탭에 자동 반영됩니다</p>
+        </div>
+        <div id="pensionSettingsList"></div>
+
+        <div style="background:var(--white);border:1px solid var(--gray-mid);border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:var(--shadow)">
+          <label style="font-size:13px;font-weight:700;color:var(--navy);display:block;margin-bottom:6px">연락처 (전화번호)</label>
+          <input type="tel" id="setPhone" style="width:100%;padding:10px 12px;border:2px solid var(--gray-mid);border-radius:8px;font-size:14px;outline:none" placeholder="010-1234-5678" oninput="saveSettings()">
+        </div>
+
+        <div style="background:var(--white);border:1px solid var(--gray-mid);border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:var(--shadow)">
+          <label style="font-size:13px;font-weight:700;color:var(--navy);display:block;margin-bottom:6px">위치 (주소)</label>
+          <input type="text" id="setLocation" style="width:100%;padding:10px 12px;border:2px solid var(--gray-mid);border-radius:8px;font-size:14px;outline:none" placeholder="전북 군산시" oninput="saveSettings()">
+        </div>
+
+        <div style="background:var(--white);border:1px solid var(--gray-mid);border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:var(--shadow)">
+          <label style="font-size:13px;font-weight:700;color:var(--navy);display:block;margin-bottom:6px">환영 인사말</label>
+          <textarea id="setGreeting" rows="2" style="width:100%;padding:10px 12px;border:2px solid var(--gray-mid);border-radius:8px;font-size:14px;outline:none;resize:vertical" placeholder="오늘도 숙소톡과 함께 외국인 게스트를 편하게 응대하세요" oninput="saveSettings()"></textarea>
+        </div>
+
+        <div style="background:var(--white);border:1px solid var(--gray-mid);border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:var(--shadow)">
+          <label style="font-size:13px;font-weight:700;color:var(--navy);display:block;margin-bottom:6px">체크인 시간</label>
+          <input type="text" id="setCheckinTime" style="width:100%;padding:10px 12px;border:2px solid var(--gray-mid);border-radius:8px;font-size:14px;outline:none" placeholder="오후 3시" oninput="saveSettings()">
+        </div>
+
+        <div style="background:var(--white);border:1px solid var(--gray-mid);border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:var(--shadow)">
+          <label style="font-size:13px;font-weight:700;color:var(--navy);display:block;margin-bottom:6px">체크아웃 시간</label>
+          <input type="text" id="setCheckoutTime" style="width:100%;padding:10px 12px;border:2px solid var(--gray-mid);border-radius:8px;font-size:14px;outline:none" placeholder="오전 11시" oninput="saveSettings()">
+        </div>
+
+        <div style="background:var(--blue-pale);border-radius:12px;padding:16px;margin-top:16px">
+          <p style="font-size:13px;color:var(--navy);font-weight:600;margin-bottom:8px">💡 사용 팁</p>
+          <p style="font-size:12px;color:#4a5568;line-height:1.6">
+            • 설정을 변경하면 자동 저장됩니다<br>
+            • WiFi 비밀번호를 입력하면 시설안내 템플릿에 자동 반영됩니다<br>
+            • 다른 숙소 사장님에게 이 앱을 공유할 때, 설정만 변경하면 바로 사용 가능합니다<br>
+            • '초기화' 버튼으로 기본값으로 되돌릴 수 있습니다
+          </p>
+        </div>
+        <button onclick="resetSettings()" style="width:100%;margin-top:12px;padding:12px;background:var(--white);border:2px solid var(--red);color:var(--red);border-radius:12px;font-size:14px;font-weight:600;cursor:pointer">🔄 기본값으로 초기화</button>
+      </div>
+    </div>
+  </div>
+
+  <button class="mic-float" id="micBtn" onclick="toggleRecording()">🎤</button>
+
+  <nav>
+    <button class="active" data-tab="tabHome" onclick="goToTab('tabHome')">
+      <span class="nav-icon">🏠</span>홈
+    </button>
+    <button data-tab="tabConv" onclick="goToTab('tabConv')">
+      <span class="nav-icon">💬</span>대화
+    </button>
+    <button data-tab="tabVoice" onclick="goToTab('tabVoice')">
+      <span class="nav-icon">🗣</span>통역
+    </button>
+    <button data-tab="tabPension" onclick="goToTab('tabPension')">
+      <span class="nav-icon">🏡</span>숙소
+    </button>
+    <button data-tab="tabLocal" onclick="goToTab('tabLocal')">
+      <span class="nav-icon">🎉</span>축제/맛집
+    </button>
+    <button data-tab="tabSettings" onclick="goToTab('tabSettings')">
+      <span class="nav-icon">⚙️</span>설정
+    </button>
+  </nav>
+
+  <div class="install-banner" id="installBanner">
+    <span style="font-size:13px">홈 화면에 추가하시겠습니까?</span>
+    <div>
+      <button class="close" onclick="dismissInstall()">✕</button>
+      <button onclick="installApp()">설치</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+// ========================
+// TEMPLATE DATA
+// ========================
+const TEMPLATES = [
+  {cat:"checkin",ko:"환영합니다! 예약하신 분 맞으시죠?",en:"Welcome! You have a reservation, right?",ja:"ようこそ！ご予約のお客様ですね？",zh:"欢迎！您有预订对吗？"},
+  {cat:"checkin",ko:"체크인 시간은 오후 3시입니다",en:"Check-in time is 3 PM",ja:"チェックインは午後3時です",zh:"入住时间是下午3点"},
+  {cat:"checkin",ko:"체크아웃 시간은 오전 11시입니다",en:"Check-out time is 11 AM",ja:"チェックアウトは午前11時です",zh:"退房时间是上午11点"},
+  {cat:"checkin",ko:"신분증을 보여주시겠어요?",en:"May I see your ID?",ja:"身分証をお見せいただけますか？",zh:"请出示您的身份证件好吗？"},
+  {cat:"checkin",ko:"객실 열쇠입니다",en:"Here is your room key",ja:"こちらがお部屋の鍵です",zh:"这是您的房间钥匙"},
+  {cat:"checkin",ko:"짐을 옮겨 드릴까요?",en:"Shall I help with your luggage?",ja:"お荷物をお運びしましょうか？",zh:"需要帮您搬行李吗？"},
+  {cat:"checkin",ko:"즐거운 시간 되세요!",en:"Have a wonderful stay!",ja:"素敵な時間をお過ごしください！",zh:"祝您住得愉快！"},
+  {cat:"checkin",ko:"또 오세요! 감사합니다!",en:"Please come again! Thank you!",ja:"またお越しください！ありがとうございます！",zh:"欢迎再来！谢谢！"},
+  {cat:"facility",ko:"와이파이 비밀번호는 ___입니다",en:"The WiFi password is ___",ja:"WiFiのパスワードは___です",zh:"WiFi密码是___"},
+  {cat:"facility",ko:"바비큐 시설은 야외에 있습니다",en:"The BBQ area is outside",ja:"バーベキュー施設は屋外にあります",zh:"烧烤设施在室外"},
+  {cat:"facility",ko:"주차는 건물 앞에 해주세요",en:"Please park in front of the building",ja:"建物の前に駐車してください",zh:"请在建筑物前面停车"},
+  {cat:"facility",ko:"수영장은 오전 9시부터 오후 9시까지 이용 가능합니다",en:"Pool is available from 9 AM to 9 PM",ja:"プールは午前9時から午後9時まで利用できます",zh:"游泳池开放时间为上午9点到晚上9点"},
+  {cat:"facility",ko:"온수가 나오지 않으면 보일러를 확인해주세요",en:"If there's no hot water, please check the boiler",ja:"お湯が出ない場合はボイラーをご確認ください",zh:"如果没有热水请检查锅炉"},
+  {cat:"facility",ko:"에어컨 리모컨은 침대 옆에 있습니다",en:"The AC remote is next to the bed",ja:"エアコンのリモコンはベッドの横にあります",zh:"空调遥控器在床边"},
+  {cat:"claim",ko:"불편을 드려 죄송합니다",en:"We apologize for the inconvenience",ja:"ご不便をおかけして申し訳ありません",zh:"给您带来不便深表歉意"},
+  {cat:"claim",ko:"바로 확인해 보겠습니다",en:"I'll check it right away",ja:"すぐに確認いたします",zh:"我马上确认"},
+  {cat:"claim",ko:"다른 객실로 변경해 드릴까요?",en:"Would you like to change to another room?",ja:"別のお部屋に変更いたしましょうか？",zh:"要给您换一间房吗？"},
+  {cat:"claim",ko:"수리 기사를 부르겠습니다",en:"I'll call a repairman",ja:"修理業者を呼びます",zh:"我叫维修人员来"},
+  {cat:"claim",ko:"환불 처리해 드리겠습니다",en:"We will process a refund",ja:"返金処理いたします",zh:"我们会给您退款"},
+  {cat:"claim",ko:"소음에 대해 죄송합니다",en:"Sorry about the noise",ja:"騒音について申し訳ありません",zh:"对噪音深表歉意"},
+  {cat:"tour",ko:"새만금 방조제는 차로 20분 거리입니다",en:"Saemangeum Seawall is 20 min by car",ja:"セマングム防潮堤は車で20分です",zh:"新万金海堤开车20分钟"},
+  {cat:"tour",ko:"군산 근대역사박물관을 추천합니다",en:"I recommend Gunsan Modern History Museum",ja:"群山近代歴史博物館をお勧めします",zh:"推荐群山近代历史博物馆"},
+  {cat:"tour",ko:"택시를 불러드릴까요?",en:"Shall I call a taxi?",ja:"タクシーをお呼びしましょうか？",zh:"需要帮您叫出租车吗？"},
+  {cat:"tour",ko:"가장 가까운 편의점은 도보 5분 거리입니다",en:"The nearest convenience store is 5 min walk",ja:"最寄りのコンビニは徒歩5分です",zh:"最近的便利店步行5分钟"},
+  {cat:"tour",ko:"이 지도를 참고해주세요",en:"Please refer to this map",ja:"こちらの地図をご参考ください",zh:"请参考这张地图"},
+  {cat:"tour",ko:"월명동 맛집을 추천해 드릴까요?",en:"Can I recommend restaurants in Wolmyeong-dong?",ja:"月明洞のおすすめレストランをご紹介しましょうか？",zh:"要推荐月明洞的美食吗？"},
+  {cat:"meal",ko:"조식은 오전 8시부터 10시까지입니다",en:"Breakfast is from 8 AM to 10 AM",ja:"朝食は午前8時から10時までです",zh:"早餐时间为上午8点到10点"},
+  {cat:"meal",ko:"음식 알레르기가 있으신가요?",en:"Do you have any food allergies?",ja:"食物アレルギーはありますか？",zh:"您有食物过敏吗？"},
+  {cat:"meal",ko:"근처 맛집을 알려드릴게요",en:"Let me recommend nearby restaurants",ja:"近くの美味しいお店をご紹介します",zh:"我来推荐附近的美食店"},
+  {cat:"meal",ko:"배달 음식을 주문해 드릴까요?",en:"Shall I order delivery food for you?",ja:"出前を注文いたしましょうか？",zh:"需要帮您点外卖吗？"},
+  {cat:"meal",ko:"주방 이용 가능합니다",en:"The kitchen is available",ja:"キッチンをご利用いただけます",zh:"可以使用厨房"},
+  {cat:"emergency",ko:"비상 출구는 복도 끝에 있습니다",en:"Emergency exit is at the end of the hallway",ja:"非常口は廊下の突き当たりにあります",zh:"紧急出口在走廊尽头"},
+  {cat:"emergency",ko:"119에 전화해 드릴까요?",en:"Shall I call 119?",ja:"119に電話しましょうか？",zh:"需要帮您打119吗？"},
+  {cat:"emergency",ko:"가까운 병원을 안내해 드리겠습니다",en:"I'll guide you to the nearest hospital",ja:"最寄りの病院をご案内します",zh:"我来带您去最近的医院"},
+  {cat:"emergency",ko:"약국은 근처에 있습니다",en:"There's a pharmacy nearby",ja:"薬局は近くにあります",zh:"附近有药店"},
+  {cat:"emergency",ko:"경찰에 신고하시겠어요?",en:"Would you like to report to the police?",ja:"警察に届け出ますか？",zh:"需要报警吗？"}
+];
+
+// ========================
+// STATE
+// ========================
+let currentLang = 'en';
+let currentCategory = 'all';
+let isRecording = false;
+let recognition = null;
+let conversationHistory = [];
+let deferredPrompt = null;
+
+// ========================
+// LANGUAGE SELECTOR
+// ========================
+function renderLangSelector(){
+  const el=document.getElementById('langSelector');
+  el.innerHTML=LANG_DATA.filter(l=>l.code!=='ko').map(l=>
+    `<button class="lang-btn${l.code===currentLang?' active':''}" data-lang="${l.code}" onclick="setLang('${l.code}')">${l.flag} ${l.name}</button>`
+  ).join('');
+}
+
+function setLang(lang) {
+  currentLang = lang;
+  renderLangSelector();
+  renderTemplates();
+  const l=LANG_DATA.find(d=>d.code===lang);
+  showToast((l?l.name:'') + ' 선택됨');
+}
+
+// ========================
+// TAB NAVIGATION
+// ========================
+function goToTab(tabId) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  document.querySelectorAll('nav button').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === tabId);
+  });
+  const micBtn = document.getElementById('micBtn');
+  micBtn.style.display = (tabId === 'tabSettings') ? 'none' : 'flex';
+}
+
+// ========================
+// CATEGORY FILTER
+// ========================
+function filterCategory(cat) {
+  currentCategory = cat;
+  document.querySelectorAll('.cat-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.cat === cat);
+  });
+  renderTemplates();
+  if (cat !== 'all') {
+    const tabEl = document.querySelector(`.cat-btn[data-cat="${cat}"]`);
+    if (tabEl) tabEl.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});
+  }
+}
+
+// ========================
+// RENDER TEMPLATES
+// ========================
+function getTemplateTrans(t, lang) {
+  // Return translation, with fallback to en, then dictionary translation
+  if (t[lang]) return t[lang];
+  if (t.en && DICT[lang]) {
+    let result = t.ko;
+    const dict = DICT[lang];
+    const keys = Object.keys(dict).sort((a,b) => b.length - a.length);
+    for (const k of keys) { result = result.split(k).join(dict[k]); }
+    return result;
+  }
+  return t.en || t.ko;
+}
+
+function renderTemplates() {
+  const list = document.getElementById('templateList');
+  const filtered = currentCategory === 'all' ? TEMPLATES : TEMPLATES.filter(t => t.cat === currentCategory);
+  let html = '';
+  filtered.forEach((t, i) => {
+    const trans = getTemplateTrans(t, currentLang);
+    html += `<div class="template-card">
+      <div class="template-ko">${t.ko}</div>
+      <div class="template-trans">${trans}</div>
+      <div class="template-actions">
+        <button class="tmpl-btn speak" onclick="speakTemplate(${i},'${currentLang}')">🔊 읽기</button>
+        <button class="tmpl-btn" onclick="speakTemplate(${i},'ko')">🔊 한국어</button>
+        <button class="tmpl-btn" onclick="copyText(this.closest('.template-card').querySelector('.template-trans').textContent)">📋 복사</button>
+      </div>
+    </div>`;
+  });
+  list.innerHTML = html;
+}
+
+// ========================
+// TTS - TEXT TO SPEECH
+// ========================
+function getTTSLang(lang) {
+  const l=LANG_DATA.find(d=>d.code===lang);
+  return l?l.speech:'en-US';
+}
+
+function speak(text, lang) {
+  if (!window.speechSynthesis) { showToast('TTS를 지원하지 않는 브라우저입니다'); return; }
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = getTTSLang(lang);
+  utter.rate = 0.9;
+  utter.pitch = 1;
+  const voices = window.speechSynthesis.getVoices();
+  const match = voices.find(v => v.lang.startsWith(getTTSLang(lang).substring(0,2)));
+  if (match) utter.voice = match;
+  window.speechSynthesis.speak(utter);
+}
+
+function speakTemplate(idx, lang) {
+  const filtered = currentCategory === 'all' ? TEMPLATES : TEMPLATES.filter(t => t.cat === currentCategory);
+  const t = filtered[idx];
+  if (!t) return;
+  const text = lang === 'ko' ? t.ko : t[lang];
+  speak(text, lang);
+  addHistory(t.ko, t[currentLang], currentLang);
+}
+
+// ========================
+// FLOATING MIC BUTTON
+// ========================
+function toggleRecording() {
+  // 통역 탭으로 이동 후 한국어 측 마이크 시작
+  goToTab('tabVoice');
+  setTransMode('conv');
+  startConvVoice(1);
+}
+
+// ========================
+// TRANSLATION (TEMPLATE MATCHING + DICTIONARY)
+// ========================
+const DICT = {
+  en:{"안녕하세요":"Hello","감사합니다":"Thank you","죄송합니다":"Sorry","네":"Yes","아니요":"No","방":"room","열쇠":"key","화장실":"bathroom","수건":"towel","비누":"soap","샴푸":"shampoo","침대":"bed","베개":"pillow","이불":"blanket","에어컨":"air conditioner","히터":"heater","와이파이":"WiFi","비밀번호":"password","주차":"parking","아침":"breakfast","저녁":"dinner","물":"water","뜨거운 물":"hot water","찬물":"cold water","전기":"electricity","전등":"light","문":"door","창문":"window","TV":"TV","리모컨":"remote control","냉장고":"refrigerator","세탁기":"washing machine","수영장":"pool","바비큐":"BBQ","정원":"garden","주방":"kitchen","택시":"taxi","버스":"bus","병원":"hospital","약국":"pharmacy","경찰":"police","편의점":"convenience store","식당":"restaurant","마트":"supermarket","은행":"bank","도와주세요":"Please help","어디":"where","언제":"when","얼마":"how much","체크인":"check-in","체크아웃":"check-out","예약":"reservation","취소":"cancel","환영합니다":"Welcome","숙소":"accommodation","객실":"room","청소":"cleaning","수리":"repair","소음":"noise","환불":"refund"},
+  ja:{"안녕하세요":"こんにちは","감사합니다":"ありがとうございます","죄송합니다":"すみません","네":"はい","아니요":"いいえ","방":"部屋","열쇠":"鍵","화장실":"トイレ","수건":"タオル","비누":"石鹸","샴푸":"シャンプー","침대":"ベッド","베개":"枕","이불":"布団","에어컨":"エアコン","히터":"ヒーター","와이파이":"WiFi","비밀번호":"パスワード","주차":"駐車","아침":"朝食","저녁":"夕食","물":"水","뜨거운 물":"お湯","찬물":"冷水","문":"ドア","창문":"窓","TV":"テレビ","리모컨":"リモコン","냉장고":"冷蔵庫","택시":"タクシー","버스":"バス","병원":"病院","약국":"薬局","경찰":"警察","편의점":"コンビニ","식당":"レストラン","도와주세요":"助けてください","체크인":"チェックイン","체크아웃":"チェックアウト","예약":"予約","취소":"キャンセル","환영합니다":"ようこそ","숙소":"宿泊施設","객실":"客室","청소":"清掃","수리":"修理","환불":"返金"},
+  zh:{"안녕하세요":"你好","감사합니다":"谢谢","죄송합니다":"对不起","네":"是","아니요":"不是","방":"房间","열쇠":"钥匙","화장실":"卫生间","수건":"毛巾","비누":"肥皂","샴푸":"洗发水","침대":"床","베개":"枕头","이불":"被子","에어컨":"空调","히터":"暖气","와이파이":"WiFi","비밀번호":"密码","주차":"停车","아침":"早餐","저녁":"晚餐","물":"水","뜨거운 물":"热水","찬물":"冷水","문":"门","창문":"窗户","TV":"电视","리모컨":"遥控器","냉장고":"冰箱","택시":"出租车","버스":"公交车","병원":"医院","약국":"药店","경찰":"警察","편의점":"便利店","식당":"餐厅","도와주세요":"请帮帮我","체크인":"入住","체크아웃":"退房","예약":"预订","취소":"取消","환영합니다":"欢迎","숙소":"住宿","객실":"客房","청소":"打扫","환불":"退款"},
+  zhtw:{"안녕하세요":"您好","감사합니다":"謝謝","죄송합니다":"對不起","네":"是","아니요":"不是","방":"房間","열쇠":"鑰匙","화장실":"洗手間","침대":"床","에어컨":"冷氣","와이파이":"WiFi","비밀번호":"密碼","주차":"停車","아침":"早餐","저녁":"晚餐","물":"水","택시":"計程車","병원":"醫院","약국":"藥局","경찰":"警察","편의점":"便利商店","식당":"餐廳","도와주세요":"請幫幫我","체크인":"入住","체크아웃":"退房","예약":"預約","취소":"取消","환영합니다":"歡迎"},
+  es:{"안녕하세요":"Hola","감사합니다":"Gracias","죄송합니다":"Lo siento","네":"Sí","아니요":"No","방":"habitación","열쇠":"llave","화장실":"baño","수건":"toalla","침대":"cama","에어컨":"aire acondicionado","와이파이":"WiFi","비밀번호":"contraseña","주차":"estacionamiento","아침":"desayuno","저녁":"cena","물":"agua","뜨거운 물":"agua caliente","택시":"taxi","버스":"autobús","병원":"hospital","약국":"farmacia","경찰":"policía","식당":"restaurante","도와주세요":"Ayúdeme por favor","체크인":"check-in","체크아웃":"check-out","예약":"reservación","취소":"cancelar","환영합니다":"Bienvenido"},
+  fr:{"안녕하세요":"Bonjour","감사합니다":"Merci","죄송합니다":"Désolé","네":"Oui","아니요":"Non","방":"chambre","열쇠":"clé","화장실":"salle de bain","수건":"serviette","침대":"lit","에어컨":"climatisation","와이파이":"WiFi","비밀번호":"mot de passe","주차":"parking","아침":"petit-déjeuner","저녁":"dîner","물":"eau","뜨거운 물":"eau chaude","택시":"taxi","버스":"bus","병원":"hôpital","약국":"pharmacie","경찰":"police","식당":"restaurant","도와주세요":"Aidez-moi s'il vous plaît","체크인":"enregistrement","체크아웃":"départ","예약":"réservation","취소":"annuler","환영합니다":"Bienvenue"},
+  vi:{"안녕하세요":"Xin chào","감사합니다":"Cảm ơn","죄송합니다":"Xin lỗi","네":"Vâng","아니요":"Không","방":"phòng","열쇠":"chìa khóa","화장실":"phòng tắm","수건":"khăn","침대":"giường","에어컨":"máy lạnh","와이파이":"WiFi","비밀번호":"mật khẩu","주차":"bãi đỗ xe","아침":"bữa sáng","저녁":"bữa tối","물":"nước","뜨거운 물":"nước nóng","택시":"taxi","버스":"xe buýt","병원":"bệnh viện","약국":"nhà thuốc","경찰":"cảnh sát","식당":"nhà hàng","도와주세요":"Xin giúp tôi","체크인":"nhận phòng","체크아웃":"trả phòng","예약":"đặt phòng","취소":"hủy","환영합니다":"Chào mừng"},
+  th:{"안녕하세요":"สวัสดี","감사합니다":"ขอบคุณ","죄송합니다":"ขอโทษ","네":"ใช่","아니요":"ไม่","방":"ห้อง","열쇠":"กุญแจ","화장실":"ห้องน้ำ","수건":"ผ้าเช็ดตัว","침대":"เตียง","에어컨":"แอร์","와이파이":"WiFi","비밀번호":"รหัสผ่าน","주차":"ที่จอดรถ","아침":"อาหารเช้า","저녁":"อาหารเย็น","물":"น้ำ","뜨거운 물":"น้ำร้อน","택시":"แท็กซี่","버스":"รถเมล์","병원":"โรงพยาบาล","약국":"ร้านขายยา","경찰":"ตำรวจ","식당":"ร้านอาหาร","도와주세요":"ช่วยด้วย","체크인":"เช็คอิน","체크아웃":"เช็คเอาท์","예약":"จอง","취소":"ยกเลิก","환영합니다":"ยินดีต้อนรับ"},
+  id:{"안녕하세요":"Halo","감사합니다":"Terima kasih","죄송합니다":"Maaf","네":"Ya","아니요":"Tidak","방":"kamar","열쇠":"kunci","화장실":"kamar mandi","수건":"handuk","침대":"tempat tidur","에어컨":"AC","와이파이":"WiFi","비밀번호":"kata sandi","주차":"parkir","아침":"sarapan","저녁":"makan malam","물":"air","뜨거운 물":"air panas","택시":"taksi","버스":"bus","병원":"rumah sakit","약국":"apotek","경찰":"polisi","식당":"restoran","도와주세요":"Tolong","체크인":"check-in","체크아웃":"check-out","예약":"reservasi","취소":"batal","환영합니다":"Selamat datang"},
+  ru:{"안녕하세요":"Здравствуйте","감사합니다":"Спасибо","죄송합니다":"Извините","네":"Да","아니요":"Нет","방":"комната","열쇠":"ключ","화장실":"ванная","수건":"полотенце","침대":"кровать","에어컨":"кондиционер","와이파이":"WiFi","비밀번호":"пароль","주차":"парковка","아침":"завтрак","저녁":"ужин","물":"вода","뜨거운 물":"горячая вода","택시":"такси","버스":"автобус","병원":"больница","약국":"аптека","경찰":"полиция","식당":"ресторан","도와주세요":"Помогите","체크인":"регистрация","체크아웃":"выезд","예약":"бронирование","취소":"отмена","환영합니다":"Добро пожаловать"},
+  de:{"안녕하세요":"Hallo","감사합니다":"Danke","죄송합니다":"Entschuldigung","네":"Ja","아니요":"Nein","방":"Zimmer","열쇠":"Schlüssel","화장실":"Badezimmer","수건":"Handtuch","침대":"Bett","에어컨":"Klimaanlage","와이파이":"WiFi","비밀번호":"Passwort","주차":"Parkplatz","아침":"Frühstück","저녁":"Abendessen","물":"Wasser","뜨거운 물":"heißes Wasser","택시":"Taxi","버스":"Bus","병원":"Krankenhaus","약국":"Apotheke","경찰":"Polizei","식당":"Restaurant","도와주세요":"Bitte helfen Sie mir","체크인":"Check-in","체크아웃":"Check-out","예약":"Reservierung","취소":"Stornierung","환영합니다":"Willkommen"},
+  it:{"안녕하세요":"Ciao","감사합니다":"Grazie","죄송합니다":"Mi scusi","네":"Sì","아니요":"No","방":"camera","열쇠":"chiave","화장실":"bagno","수건":"asciugamano","침대":"letto","에어컨":"aria condizionata","와이파이":"WiFi","비밀번호":"password","주차":"parcheggio","아침":"colazione","저녁":"cena","물":"acqua","뜨거운 물":"acqua calda","택시":"taxi","버스":"autobus","병원":"ospedale","약국":"farmacia","경찰":"polizia","식당":"ristorante","도와주세요":"Mi aiuti per favore","체크인":"check-in","체크아웃":"check-out","예약":"prenotazione","취소":"cancellare","환영합니다":"Benvenuto"},
+  ar:{"안녕하세요":"مرحبا","감사합니다":"شكرا","죄송합니다":"آسف","네":"نعم","아니요":"لا","방":"غرفة","열쇠":"مفتاح","화장실":"حمام","수건":"منشفة","침대":"سرير","에어컨":"مكيف","와이파이":"واي فاي","비밀번호":"كلمة المرور","주차":"موقف سيارات","아침":"فطور","저녁":"عشاء","물":"ماء","뜨거운 물":"ماء ساخن","택시":"تاكسي","버스":"حافلة","병원":"مستشفى","약국":"صيدلية","경찰":"شرطة","식당":"مطعم","도와주세요":"ساعدني","체크인":"تسجيل الوصول","체크아웃":"تسجيل المغادرة","예약":"حجز","취소":"إلغاء","환영합니다":"أهلا وسهلا"}
+};
+
+// (구 음성탭 번역/삭제 함수 — 파파고 스타일 통역으로 대체됨)
+
+// ========================
+// CONVERSATION HISTORY
+// ========================
+function addHistory(ko, trans, lang) {
+  const langNames = {en:'영어',ja:'일본어',zh:'중국어'};
+  const now = new Date();
+  const time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+  conversationHistory.unshift({ko, trans, lang: langNames[lang] || lang, time});
+  if (conversationHistory.length > 50) conversationHistory.pop();
+  renderHistory();
+}
+
+function renderHistory() {
+  const container = document.getElementById('historyList');
+  if (conversationHistory.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div class="icon">💬</div><p>아직 대화 기록이 없습니다.<br>음성 또는 템플릿으로 대화를 시작해보세요!</p></div>';
+    return;
+  }
+  let html = '';
+  conversationHistory.slice(0, 20).forEach(h => {
+    html += `<div class="history-item">
+      <div class="history-time">${h.time} · ${h.lang}</div>
+      <div class="history-text">${h.ko}</div>
+      <div class="history-trans">${h.trans}</div>
+    </div>`;
+  });
+  container.innerHTML = html;
+}
+
+// ========================
+// CLIPBOARD
+// ========================
+function copyText(text) {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => showToast('복사되었습니다!')).catch(() => fallbackCopy(text));
+  } else {
+    fallbackCopy(text);
+  }
+}
+
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.left = '-9999px';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); showToast('복사되었습니다!'); } catch(e) { showToast('복사 실패'); }
+  document.body.removeChild(ta);
+}
+
+// (구 copyTranslation — 파파고 스타일 통역으로 대체됨)
+
+// ========================
+// TOAST
+// ========================
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._timer);
+  el._timer = setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+// ========================
+// OFFLINE DETECTION
+// ========================
+function updateOnlineStatus() {
+  const dot = document.getElementById('statusDot');
+  const text = document.getElementById('statusText');
+  if (navigator.onLine) {
+    dot.classList.remove('offline');
+    text.textContent = '온라인';
+  } else {
+    dot.classList.add('offline');
+    text.textContent = '오프라인';
+    showToast('인터넷 연결이 끊어졌습니다. 오프라인 모드로 동작합니다.');
+  }
+}
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+
+// ========================
+// PWA INSTALL PROMPT
+// ========================
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('installBanner').style.display = 'flex';
+});
+
+function installApp() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(function(result) {
+      if (result.outcome === 'accepted') showToast('앱이 설치되었습니다!');
+      deferredPrompt = null;
+      document.getElementById('installBanner').style.display = 'none';
+    });
+  }
+}
+
+function dismissInstall() {
+  document.getElementById('installBanner').style.display = 'none';
+}
+
+// ========================
+// SERVICE WORKER REGISTRATION
+// ========================
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('./sw.js').then(function(reg) {
+      console.log('SW registered:', reg.scope);
+    }).catch(function(err) {
+      console.log('SW registration failed:', err);
+    });
+  });
+}
+
+// ========================
+// 파파고 스타일 통역 기능
+// ========================
+const LANG_DATA=[
+  {code:'ko',flag:'🇰🇷',name:'한국어',speech:'ko-KR'},
+  {code:'en',flag:'🇺🇸',name:'English',speech:'en-US'},
+  {code:'ja',flag:'🇯🇵',name:'日本語',speech:'ja-JP'},
+  {code:'zh',flag:'🇨🇳',name:'中文',speech:'zh-CN'},
+  {code:'zhtw',flag:'🇹🇼',name:'繁體中文',speech:'zh-TW'},
+  {code:'es',flag:'🇪🇸',name:'Español',speech:'es-ES'},
+  {code:'fr',flag:'🇫🇷',name:'Français',speech:'fr-FR'},
+  {code:'vi',flag:'🇻🇳',name:'Tiếng Việt',speech:'vi-VN'},
+  {code:'th',flag:'🇹🇭',name:'ไทย',speech:'th-TH'},
+  {code:'id',flag:'🇮🇩',name:'Indonesia',speech:'id-ID'},
+  {code:'ru',flag:'🇷🇺',name:'Русский',speech:'ru-RU'},
+  {code:'de',flag:'🇩🇪',name:'Deutsch',speech:'de-DE'},
+  {code:'it',flag:'🇮🇹',name:'Italiano',speech:'it-IT'},
+  {code:'ar',flag:'🇸🇦',name:'العربية',speech:'ar-SA'}
+];
+
+let convHistoryArr=[];
+
+function setTransMode(mode){
+  document.getElementById('convMode').style.display=mode==='conv'?'block':'none';
+  document.getElementById('textMode').style.display=mode==='text'?'block':'none';
+  document.getElementById('modeConvBtn').classList.toggle('active',mode==='conv');
+  document.getElementById('modeTextBtn').classList.toggle('active',mode==='text');
+}
+
+function setupConvSelects(){
+  const s1=document.getElementById('convLang1');
+  const s2=document.getElementById('convLang2');
+  const tf=document.getElementById('textFromLang');
+  const tt=document.getElementById('textToLang');
+  LANG_DATA.forEach(l=>{
+    const o1=`<option value="${l.code}" ${l.code==='ko'?'selected':''}>${l.flag} ${l.name}</option>`;
+    const o2=`<option value="${l.code}" ${l.code==='en'?'selected':''}>${l.flag} ${l.name}</option>`;
+    s1.innerHTML+=o1; s2.innerHTML+=o2;
+    tf.innerHTML+=o1; tt.innerHTML+=o2;
+  });
+  s1.onchange=()=>updateConvLabels();
+  s2.onchange=()=>updateConvLabels();
+}
+
+function updateConvLabels(){
+  const l1=LANG_DATA.find(l=>l.code===document.getElementById('convLang1').value);
+  const l2=LANG_DATA.find(l=>l.code===document.getElementById('convLang2').value);
+  if(l1)document.getElementById('convLabel1').textContent=l1.flag+' '+l1.name;
+  if(l2)document.getElementById('convLabel2').textContent=l2.flag+' '+l2.name;
+}
+
+function swapConvLangs(){
+  const s1=document.getElementById('convLang1');
+  const s2=document.getElementById('convLang2');
+  const tmp=s1.value; s1.value=s2.value; s2.value=tmp;
+  updateConvLabels();
+}
+
+function swapTextLangs(){
+  const s1=document.getElementById('textFromLang');
+  const s2=document.getElementById('textToLang');
+  const tmp=s1.value; s1.value=s2.value; s2.value=tmp;
+}
+
+function startConvVoice(side){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){showToast('이 브라우저에서 음성인식을 지원하지 않습니다');return;}
+  const langCode=side===1?document.getElementById('convLang1').value:document.getElementById('convLang2').value;
+  const lang=LANG_DATA.find(l=>l.code===langCode)||LANG_DATA[0];
+  const rec=new SR();
+  rec.lang=lang.speech;
+  rec.interimResults=true;
+  rec.continuous=false;
+  const micBtn=document.getElementById('convMic'+side);
+  const textEl=document.getElementById('convText'+side);
+  const otherSide=side===1?2:1;
+  const otherTextEl=document.getElementById('convText'+otherSide);
+  const otherLangCode=side===1?document.getElementById('convLang2').value:document.getElementById('convLang1').value;
+
+  rec.onstart=function(){
+    micBtn.style.background='#e53e3e'; micBtn.textContent='🔴';
+    textEl.textContent='듣고 있습니다...';
+    showToast('🎤 듣고 있습니다...');
+  };
+  rec.onresult=function(e){
+    let transcript='';
+    for(let i=e.resultIndex;i<e.results.length;i++){transcript+=e.results[i][0].transcript;}
+    textEl.textContent=transcript;
+    if(e.results[e.results.length-1].isFinal){
+      const translated=pensionTranslate(transcript,langCode,otherLangCode);
+      otherTextEl.textContent=translated;
+      addConvHistory(transcript,translated,langCode,otherLangCode);
+    }
+  };
+  rec.onerror=function(e){
+    micBtn.style.background=side===1?'var(--blue)':'var(--green)'; micBtn.textContent='🎤';
+    if(e.error==='not-allowed')showToast('마이크 권한이 필요합니다');
+    else if(e.error!=='no-speech')showToast('음성 인식 오류: '+e.error);
+  };
+  rec.onend=function(){
+    micBtn.style.background=side===1?'var(--blue)':'var(--green)'; micBtn.textContent='🎤';
+  };
+  rec.start();
+}
+
+function pensionTranslate(text,fromLang,toLang){
+  // 1. Template exact match
+  const matched=TEMPLATES.find(t=>t[fromLang]===text);
+  if(matched) return matched[toLang]||text;
+  // 2. Partial template match
+  const partial=TEMPLATES.find(t=>t[fromLang]&&(text.includes(t[fromLang])||t[fromLang].includes(text)));
+  if(partial) return partial[toLang]||text;
+  // 3. Dictionary lookup
+  const dict=DICT[toLang];
+  if(dict&&fromLang==='ko'){
+    let result=text;
+    const keys=Object.keys(dict).sort((a,b)=>b.length-a.length);
+    for(const k of keys){result=result.split(k).join(dict[k]);}
+    return result;
+  }
+  // 4. Reverse dict (foreign→Korean)
+  if(toLang==='ko'&&DICT[fromLang]){
+    let result=text;
+    const rd=DICT[fromLang];
+    const rdict={};
+    for(const[k,v]of Object.entries(rd)){rdict[v]=k;}
+    const keys=Object.keys(rdict).sort((a,b)=>b.length-a.length);
+    for(const k of keys){result=result.split(k).join(rdict[k]);}
+    return result;
+  }
+  return text;
+}
+
+function speakConv(side){
+  const text=document.getElementById('convText'+side).textContent;
+  const langCode=side===1?document.getElementById('convLang1').value:document.getElementById('convLang2').value;
+  if(text&&!text.includes('마이크')&&!text.includes('Press')){
+    const lang=LANG_DATA.find(l=>l.code===langCode);
+    speak(text,langCode);
+  }
+}
+
+function addConvHistory(original,translated,fromLang,toLang){
+  const fl=LANG_DATA.find(l=>l.code===fromLang);
+  const tl=LANG_DATA.find(l=>l.code===toLang);
+  const time=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
+  convHistoryArr.unshift({original,translated,from:fl?fl.flag:'',to:tl?tl.flag:'',time});
+  if(convHistoryArr.length>30)convHistoryArr.pop();
+  renderConvHistory();
+  addHistory(original,translated,toLang);
+}
+
+function renderConvHistory(){
+  const el=document.getElementById('convHistory');
+  if(convHistoryArr.length===0){
+    el.innerHTML='<div class="empty-state" style="padding:12px"><p>대화 기록이 여기에 표시됩니다</p></div>';return;
+  }
+  el.innerHTML=convHistoryArr.slice(0,10).map(h=>
+    `<div style="padding:8px;margin:4px 0;background:var(--blue-pale);border-radius:8px;font-size:13px">
+      <div style="color:var(--gray-dark);font-size:11px">${h.time} ${h.from}→${h.to}</div>
+      <div style="color:#2d3748">${h.original}</div>
+      <div style="color:var(--blue)">${h.translated}</div>
+    </div>`
+  ).join('');
+}
+
+// 텍스트 번역
+let textTransTimer=null;
+function autoTranslateText(){
+  clearTimeout(textTransTimer);
+  textTransTimer=setTimeout(()=>{
+    const input=document.getElementById('textInput').value.trim();
+    const output=document.getElementById('textOutput');
+    if(!input){output.style.display='none';return;}
+    const fromLang=document.getElementById('textFromLang').value;
+    const toLang=document.getElementById('textToLang').value;
+    const translated=pensionTranslate(input,fromLang,toLang);
+    output.textContent=translated;
+    output.style.display='block';
+  },300);
+}
+
+function speakTextResult(which){
+  if(which==='input'){
+    const t=document.getElementById('textInput').value;
+    const l=document.getElementById('textFromLang').value;
+    if(t)speak(t,l);
+  }else{
+    const t=document.getElementById('textOutput').textContent;
+    const l=document.getElementById('textToLang').value;
+    if(t)speak(t,l);
+  }
+}
+
+// 빠른 표현 버튼
+function renderQuickPhrases(){
+  const phrases=[
+    {ko:'환영합니다',en:'Welcome',ja:'ようこそ',zh:'欢迎'},
+    {ko:'감사합니다',en:'Thank you',ja:'ありがとう',zh:'谢谢'},
+    {ko:'체크인',en:'Check-in',ja:'チェックイン',zh:'入住'},
+    {ko:'체크아웃',en:'Check-out',ja:'チェックアウト',zh:'退房'},
+    {ko:'와이파이',en:'WiFi',ja:'WiFi',zh:'WiFi'},
+    {ko:'방 열쇠',en:'Room key',ja:'部屋の鍵',zh:'房间钥匙'},
+    {ko:'화장실',en:'Bathroom',ja:'トイレ',zh:'卫生间'},
+    {ko:'뜨거운 물',en:'Hot water',ja:'お湯',zh:'热水'},
+    {ko:'택시 불러주세요',en:'Call a taxi please',ja:'タクシーお願いします',zh:'请叫出租车'},
+    {ko:'맛집 추천',en:'Restaurant recommendation',ja:'おすすめレストラン',zh:'推荐餐厅'},
+    {ko:'비상구',en:'Emergency exit',ja:'非常口',zh:'紧急出口'},
+    {ko:'도와주세요',en:'Help me please',ja:'助けてください',zh:'请帮帮我'}
+  ];
+  const el=document.getElementById('quickPhrases');
+  if(!el) return;
+  const toLang=document.getElementById('textToLang')?document.getElementById('textToLang').value:'en';
+  el.innerHTML=phrases.map(p=>{
+    const tr=p[toLang]||p.en;
+    return `<button onclick="document.getElementById('textInput').value='${p.ko}';autoTranslateText()" class="tmpl-btn" style="font-size:12px">${p.ko}</button>`;
+  }).join('');
+}
+
+// ========================
+// 축제 일정 & 추천 맛집
+// ========================
+let localMode='fest';
+let festRange='month';
+
+function setLocalMode(mode){
+  localMode=mode;
+  document.getElementById('festMode').style.display=mode==='fest'?'block':'none';
+  document.getElementById('foodMode').style.display=mode==='food'?'block':'none';
+  document.getElementById('localFestBtn').classList.toggle('active',mode==='fest');
+  document.getElementById('localFoodBtn').classList.toggle('active',mode==='food');
+}
+
+function setFestRange(range){
+  festRange=range;
+  document.getElementById('festMonthBtn').classList.toggle('active',range==='month');
+  document.getElementById('festYearBtn').classList.toggle('active',range==='year');
+  searchLocal();
+}
+
+function searchLocal(){
+  const region=document.getElementById('localRegion').value.trim();
+  if(!region){showToast('지역명을 입력해주세요');return;}
+  renderFestivals(region);
+  renderRestaurants(region);
+}
+
+// === 축제 DB (주요 지역별) ===
+const FESTIVAL_DB={
+  '군산':[
+    {name:'군산 벚꽃축제',period:'3월 말~4월 초',loc:'은파유원지',desc:'은파호수 벚꽃길 야간조명, 문화공연'},
+    {name:'군산 시간여행축제',period:'9월~10월',loc:'근대역사거리',desc:'1930년대 거리 재현, 근대 복장 체험, 먹거리'},
+    {name:'군산 새만금 바다축제',period:'7월~8월',loc:'새만금 일대',desc:'해양 레포츠, 해변 공연, 불꽃놀이'},
+    {name:'군산 근대문화 야행',period:'5월~6월',loc:'월명동 일대',desc:'근대역사거리 야간 투어, 문화 공연'},
+    {name:'군산 맛 축제',period:'10월',loc:'수송동 일대',desc:'군산 대표 맛집 한자리, 이성당 빵 등'},
+    {name:'군산 세계철새축제',period:'11월~12월',loc:'금강하구둑',desc:'철새 탐조, 생태 체험 프로그램'},
+    {name:'전북 새만금 국제마라톤',period:'4월',loc:'새만금 방조제',desc:'풀코스/하프/10km 마라톤 대회'}
+  ],
+  '전주':[
+    {name:'전주 국제영화제 (JIFF)',period:'4월~5월',loc:'전주 일대',desc:'독립·예술영화 상영, 야외 상영회'},
+    {name:'전주 비빔밥축제',period:'10월',loc:'한옥마을',desc:'비빔밥 만들기 체험, 전통 음식 시식'},
+    {name:'전주 한지문화축제',period:'5월',loc:'전주 한옥마을',desc:'한지 공예 체험, 전시, 한지 패션쇼'},
+    {name:'전주 야행',period:'6월~9월',loc:'한옥마을·경기전',desc:'야간 한옥마을 투어, 전통문화 공연'},
+    {name:'전주 풍남제',period:'9월~10월',loc:'풍남문 일대',desc:'전주의 역사와 문화를 기리는 축제'}
+  ],
+  '세종':[
+    {name:'세종 호수공원 빛축제',period:'12월~2월',loc:'세종호수공원',desc:'LED 조명 축제, 야간 산책'},
+    {name:'세종 대표축제 어울림',period:'9월~10월',loc:'세종호수공원',desc:'시민 문화 예술 축제, 공연, 체험'},
+    {name:'세종 봄꽃축제',period:'4월',loc:'호수공원·금강변',desc:'벚꽃·유채꽃 구경, 문화 공연'},
+    {name:'세종 금강 자전거 축제',period:'5월',loc:'금강 자전거길',desc:'자전거 라이딩, 체험 프로그램'}
+  ],
+  '부산':[
+    {name:'부산 국제영화제 (BIFF)',period:'10월',loc:'해운대·센텀',desc:'아시아 최대 영화제'},
+    {name:'부산 불꽃축제',period:'11월',loc:'광안리 해수욕장',desc:'대규모 불꽃놀이, 레이저쇼'},
+    {name:'부산 해운대 모래축제',period:'5월~6월',loc:'해운대 해수욕장',desc:'모래 조각 전시, 해변 체험'},
+    {name:'부산 자갈치축제',period:'10월',loc:'자갈치시장',desc:'해산물 시식, 수산물 경매 체험'},
+    {name:'부산 원아시아페스티벌',period:'10월',loc:'부산 일대',desc:'K-POP 콘서트, 한류 문화행사'}
+  ],
+  '제주':[
+    {name:'제주 들불축제',period:'3월',loc:'새별오름',desc:'들불놓기 체험, 불꽃놀이'},
+    {name:'제주 유채꽃축제',period:'3월~4월',loc:'서귀포',desc:'유채꽃밭 포토존, 가족 체험'},
+    {name:'제주 해비치아트페스티벌',period:'7월',loc:'표선해비치해변',desc:'예술작품 전시, 퍼포먼스'},
+    {name:'제주 감귤축제',period:'11월',loc:'서귀포 일대',desc:'감귤 따기 체험, 시식'}
+  ],
+  '강릉':[
+    {name:'강릉 커피축제',period:'10월',loc:'안목해변',desc:'바리스타 체험, 커피 시음'},
+    {name:'강릉 단오제',period:'음력 5월',loc:'강릉 남대천',desc:'유네스코 무형문화유산, 전통 의식'},
+    {name:'경포 벚꽃축제',period:'4월',loc:'경포대',desc:'벚꽃길 산책, 야간조명'}
+  ],
+  '경주':[
+    {name:'경주 벚꽃축제',period:'3월~4월',loc:'보문단지',desc:'벚꽃 터널, 야간 조명'},
+    {name:'경주 한국의 술과 떡 잔치',period:'3월',loc:'황리단길',desc:'전통주·떡 시식 체험'},
+    {name:'신라문화제',period:'10월',loc:'경주 일대',desc:'신라 역사문화 재현 축제'}
+  ],
+  '여수':[
+    {name:'여수 밤바다 불꽃축제',period:'5월',loc:'여수 엑스포 해양공원',desc:'불꽃놀이, 드론쇼'},
+    {name:'여수 거북선축제',period:'5월',loc:'여수 시내',desc:'이순신 장군 추모, 퍼레이드'},
+    {name:'여수 국제해양레저관광축제',period:'8월',loc:'여수 일대',desc:'해양레포츠, 요트 체험'}
+  ],
+  '속초':[
+    {name:'속초 관광수산축제',period:'9월~10월',loc:'속초 해변',desc:'대게·홍게 시식, 수산물 판매'},
+    {name:'속초 해맞이축제',period:'1월 1일',loc:'속초 해변',desc:'새해 해맞이, 소원 풍등'}
+  ],
+  '대전':[
+    {name:'대전 사이언스페스티벌',period:'10월',loc:'엑스포 과학공원',desc:'과학 체험, 첨단기술 전시'},
+    {name:'대전 국제와인페스티벌',period:'6월',loc:'대전 일대',desc:'세계 와인 시음, 문화 행사'},
+    {name:'대전 효문화 뿌리축제',period:'10월',loc:'뿌리공원',desc:'족보·뿌리 문화 축제'}
+  ]
+};
+
+// === 맛집 DB (주요 지역별) ===
+const RESTAURANT_DB={
+  '군산':[
+    {name:'이성당',type:'빵집(1945년)',desc:'전국 최고 단팥빵·야채빵. 군산 근대역사의 아이콘',must:'단팥빵, 야채빵'},
+    {name:'한일옥',type:'콩나물국밥',desc:'군산 대표 해장국. 70년 전통 콩나물국밥',must:'콩나물국밥, 모주'},
+    {name:'빈해원',type:'중식(짬뽕)',desc:'군산 짬뽕 맛집. 해물이 풍성한 빨간 짬뽕',must:'짬뽕, 탕수육'},
+    {name:'복성루',type:'중식',desc:'군산 차이나타운 대표 중국집',must:'물짜장, 짬뽕'},
+    {name:'가막고을식당',type:'백반·한정식',desc:'군산 현지인 맛집. 넉넉한 반찬',must:'백반정식, 생선조림'},
+    {name:'군산 오징어볶음거리',type:'오징어볶음',desc:'수송동 오징어볶음 골목. 매콤 오징어',must:'오징어볶음, 볶음밥'},
+    {name:'해신탕',type:'해물탕',desc:'새만금 인근 싱싱한 해물탕 전문',must:'해신탕, 조개구이'},
+    {name:'나운동 횟집거리',type:'회·해산물',desc:'신선한 활어회 전문 거리',must:'모둠회, 매운탕'}
+  ],
+  '전주':[
+    {name:'한국집',type:'비빔밥',desc:'전주 비빔밥 원조 맛집',must:'전주비빔밥, 육회비빔밥'},
+    {name:'풍년제과',type:'초코파이',desc:'전주 수제 초코파이 명소',must:'수제 초코파이'},
+    {name:'삼백집',type:'백반',desc:'전주 한옥마을 대표 백반 맛집',must:'백반정식'},
+    {name:'베테랑',type:'칼국수',desc:'전주 칼국수·팥칼국수 유명',must:'칼국수, 수육'},
+    {name:'PNB 풍년제과',type:'빵집',desc:'전주 전통 빵집',must:'초코파이, 소보로'},
+    {name:'교동다원',type:'전통차',desc:'한옥마을 전통차 카페',must:'대추차, 유자차'}
+  ],
+  '세종':[
+    {name:'도담골식당',type:'한식',desc:'세종 도담동 현지인 한식 맛집',must:'된장찌개, 제육볶음'},
+    {name:'미르식당',type:'순두부',desc:'세종 현지인 순두부 맛집',must:'순두부찌개'},
+    {name:'아름동 칼국수',type:'칼국수',desc:'세종 아름동 대표 칼국수',must:'칼국수, 만두'},
+    {name:'세종버거',type:'수제버거',desc:'세종 로컬 수제버거',must:'세종버거, 감자튀김'}
+  ],
+  '부산':[
+    {name:'삼진어묵',type:'어묵',desc:'부산 대표 프리미엄 어묵',must:'어묵고로케, 어묵탕'},
+    {name:'할매국밥',type:'돼지국밥',desc:'서면 돼지국밥 원조',must:'돼지국밥, 순대'},
+    {name:'자갈치시장',type:'회·해산물',desc:'부산 대표 수산시장',must:'활어회, 회덮밥'},
+    {name:'BIFF 광장 씨앗호떡',type:'호떡',desc:'영화의 전당 앞 명물',must:'씨앗호떡'},
+    {name:'해운대 암소갈비',type:'갈비',desc:'해운대 대표 소갈비',must:'양념갈비, 생갈비'}
+  ],
+  '제주':[
+    {name:'돈사돈',type:'흑돼지',desc:'제주 흑돼지 구이 맛집',must:'흑돼지 근고기'},
+    {name:'올래국수',type:'고기국수',desc:'제주 고기국수 원조',must:'고기국수, 비빔국수'},
+    {name:'성산일출봉 해녀의집',type:'해산물',desc:'성산 해녀가 직접 잡은 해산물',must:'전복죽, 해물뚝배기'},
+    {name:'우진해장국',type:'해장국',desc:'제주시 고사리해장국 명소',must:'고사리해장국'}
+  ],
+  '강릉':[
+    {name:'안목해변 카페거리',type:'카페',desc:'강릉 대표 바다뷰 카페 거리',must:'핸드드립 커피'},
+    {name:'초당순두부마을',type:'순두부',desc:'초당동 순두부 원조 마을',must:'순두부찌개, 두부전골'},
+    {name:'교동반점',type:'짬뽕',desc:'강릉 짬뽕 맛집',must:'짬뽕, 볶음밥'}
+  ],
+  '경주':[
+    {name:'황리단길 맛집거리',type:'다양',desc:'경주 트렌디 맛집 골목',must:'경주빵, 찰보리빵'},
+    {name:'교리김밥',type:'김밥',desc:'경주 대표 김밥 맛집',must:'교리김밥'},
+    {name:'요석궁',type:'한정식',desc:'경주 전통 한정식',must:'한정식 코스'}
+  ],
+  '여수':[
+    {name:'여수 서대회센터',type:'회·해산물',desc:'여수 대표 횟집 단지',must:'갓김치삼합, 서대회'},
+    {name:'여수 게장백반거리',type:'게장',desc:'중앙동 게장 백반 골목',must:'간장게장, 양념게장'},
+    {name:'여수밤바다 야시장',type:'다양',desc:'여수 야간 먹거리 장터',must:'꿀빵, 해물요리'}
+  ]
+};
+
+function renderFestivals(region){
+  const el=document.getElementById('festResults');
+  // Find matching region
+  let festivals=[];
+  for(const[key,fests]of Object.entries(FESTIVAL_DB)){
+    if(region.includes(key)||key.includes(region)){
+      festivals=fests;
+      break;
+    }
+  }
+  if(festivals.length===0){
+    // Provide Naver search link as fallback
+    const q=encodeURIComponent(region+' 축제 일정 2026');
+    el.innerHTML=`<div style="text-align:center;padding:20px">
+      <p style="color:var(--gray-dark);margin-bottom:12px">"${region}" 축제 데이터가 아직 등록되지 않았습니다</p>
+      <a href="https://search.naver.com/search.naver?query=${q}" target="_blank" rel="noopener" style="display:inline-block;background:var(--green);color:var(--white);text-decoration:none;padding:10px 20px;border-radius:8px;font-size:14px">🔍 네이버에서 "${region} 축제" 검색</a>
+    </div>`;
+    return;
+  }
+
+  const now=new Date();
+  const currentMonth=now.getMonth()+1;
+  const monthNames=['','1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+
+  let filtered=festivals;
+  if(festRange==='month'){
+    filtered=festivals.filter(f=>{
+      const m=f.period.match(/(\d+)월/);
+      if(m){
+        const fMonth=parseInt(m[1]);
+        return Math.abs(fMonth-currentMonth)<=1;
+      }
+      return true;
+    });
+    if(filtered.length===0)filtered=festivals; // fallback to all
+  }
+
+  el.innerHTML=`<div style="font-size:13px;color:var(--blue);font-weight:600;margin-bottom:8px">🎉 ${region} 축제 (${festRange==='month'?monthNames[currentMonth]+' 전후':'연간 전체'}) — ${filtered.length}건</div>`+
+    filtered.map(f=>{
+      const q=encodeURIComponent(f.name+' 2026');
+      return `<div style="background:var(--white);border:1px solid var(--gray-mid);border-radius:12px;padding:14px;margin-bottom:8px;box-shadow:var(--shadow)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div style="font-size:15px;font-weight:700;color:var(--navy)">${f.name}</div>
+          <span style="font-size:11px;background:var(--blue-pale);color:var(--blue);padding:3px 8px;border-radius:10px;white-space:nowrap">${f.period}</span>
+        </div>
+        <div style="font-size:12px;color:var(--gray-dark);margin:4px 0">📍 ${f.loc}</div>
+        <div style="font-size:13px;color:#4a5568;line-height:1.5">${f.desc}</div>
+        <a href="https://search.naver.com/search.naver?query=${q}" target="_blank" rel="noopener" style="display:inline-block;margin-top:6px;font-size:12px;color:var(--blue);text-decoration:none">🔗 네이버에서 상세 보기 →</a>
+      </div>`;
+    }).join('');
+}
+
+function renderRestaurants(region){
+  const el=document.getElementById('foodResults');
+  let restaurants=[];
+  for(const[key,rests]of Object.entries(RESTAURANT_DB)){
+    if(region.includes(key)||key.includes(region)){
+      restaurants=rests;
+      break;
+    }
+  }
+  if(restaurants.length===0){
+    const q=encodeURIComponent(region+' 맛집 추천');
+    el.innerHTML=`<div style="text-align:center;padding:20px">
+      <p style="color:var(--gray-dark);margin-bottom:12px">"${region}" 맛집 데이터가 아직 등록되지 않았습니다</p>
+      <a href="https://map.naver.com/p/search/${encodeURIComponent(region+' 맛집')}" target="_blank" rel="noopener" style="display:inline-block;background:var(--green);color:var(--white);text-decoration:none;padding:10px 20px;border-radius:8px;font-size:14px">🔍 네이버지도에서 "${region} 맛집" 검색</a>
+    </div>`;
+    return;
+  }
+
+  el.innerHTML=`<div style="font-size:13px;color:var(--orange);font-weight:600;margin-bottom:8px">🍽 ${region} 추천 맛집 — ${restaurants.length}곳</div>`+
+    restaurants.map(r=>{
+      const naverQ=encodeURIComponent(region+' '+r.name);
+      return `<a href="https://map.naver.com/p/search/${naverQ}" target="_blank" rel="noopener" style="text-decoration:none;color:inherit;display:block">
+        <div style="background:var(--white);border:1px solid var(--gray-mid);border-radius:12px;padding:14px;margin-bottom:8px;box-shadow:var(--shadow);transition:transform 0.15s" onmousedown="this.style.transform='scale(0.98)'" onmouseup="this.style.transform=''" ontouchstart="this.style.transform='scale(0.98)'" ontouchend="this.style.transform=''">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div style="font-size:15px;font-weight:700;color:var(--navy)">${r.name}</div>
+            <span style="font-size:11px;background:var(--orange);color:var(--white);padding:3px 8px;border-radius:10px;white-space:nowrap">${r.type}</span>
+          </div>
+          <div style="font-size:13px;color:#4a5568;margin:4px 0;line-height:1.5">${r.desc}</div>
+          <div style="font-size:12px;color:var(--orange);margin-top:4px">⭐ 추천: ${r.must}</div>
+          <div style="font-size:11px;color:var(--blue);margin-top:4px">📍 네이버지도에서 보기 →</div>
+        </div>
+      </a>`;
+    }).join('');
+}
+
+// ========================
+// SETTINGS (B2B Customization)
+// ========================
+const DEFAULT_PENSIONS = [
+  {name:'따숨과이룸',badge:'가족추천',loc:'군산시 소룡동',features:'바비큐장, 넓은 잔디마당, 가족 단위',desc:'넓은 잔디마당과 바비큐 시설을 갖춘 가족 단위 숙박에 최적화된 숙소입니다.'},
+  {name:'팔레드군산',badge:'도심위치',loc:'군산시 월명동',features:'모던 인테리어, 도심 위치, 교통 편리',desc:'월명동 도심에 위치한 모던한 인테리어의 숙소입니다. 근대역사거리와 가까워 관광에도 편리합니다.'},
+  {name:'군산꿀잠',badge:'가성비',loc:'군산시 나운동',features:'아늑한 객실, 합리적 가격, 깔끔한 시설',desc:'아늑하고 깔끔한 객실을 합리적인 가격에 제공하는 숙소입니다.'},
+  {name:'월명동 해피하우스',badge:'관광최적',loc:'군산시 월명동',features:'근대역사거리 인근, 관광 최적, 편리한 위치',desc:'군산 근대역사거리 인근에 위치하여 관광을 즐기기에 최적의 위치입니다.'}
+];
+
+const DEFAULT_SETTINGS = {
+  ownerName: '제이크',
+  wifiPw: '',
+  phone: '',
+  location: '전북 군산시',
+  greeting: '오늘도 숙소톡과 함께\n외국인 게스트를 편하게 응대하세요',
+  checkinTime: '오후 3시',
+  checkoutTime: '오전 11시',
+  pensions: JSON.parse(JSON.stringify(DEFAULT_PENSIONS))
+};
+
+let appSettings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+
+function loadSettings() {
+  try {
+    const saved = localStorage.getItem('pensionTalk_settings');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      appSettings = {...DEFAULT_SETTINGS, ...parsed};
+      if (!appSettings.pensions || appSettings.pensions.length === 0) {
+        appSettings.pensions = JSON.parse(JSON.stringify(DEFAULT_PENSIONS));
+      }
+    }
+  } catch(e) {}
+  applySettingsToUI();
+  applySettingsToTemplates();
+  renderPensionCards();
+}
+
+function saveSettings() {
+  appSettings.ownerName = document.getElementById('setOwnerName').value || DEFAULT_SETTINGS.ownerName;
+  appSettings.wifiPw = document.getElementById('setWifiPw').value;
+  appSettings.phone = document.getElementById('setPhone').value;
+  appSettings.location = document.getElementById('setLocation').value || DEFAULT_SETTINGS.location;
+  appSettings.greeting = document.getElementById('setGreeting').value || DEFAULT_SETTINGS.greeting;
+  appSettings.checkinTime = document.getElementById('setCheckinTime').value || DEFAULT_SETTINGS.checkinTime;
+  appSettings.checkoutTime = document.getElementById('setCheckoutTime').value || DEFAULT_SETTINGS.checkoutTime;
+  // Save pension data from form
+  appSettings.pensions.forEach((p, i) => {
+    const nameEl = document.getElementById('setPName'+i);
+    if (nameEl) {
+      p.name = nameEl.value || DEFAULT_PENSIONS[i]?.name || '숙소 '+(i+1);
+      p.badge = document.getElementById('setPBadge'+i).value || '';
+      p.loc = document.getElementById('setPLoc'+i).value || '';
+      p.features = document.getElementById('setPFeatures'+i).value || '';
+      p.desc = document.getElementById('setPDesc'+i).value || '';
+    }
+  });
+  try {
+    localStorage.setItem('pensionTalk_settings', JSON.stringify(appSettings));
+  } catch(e) {}
+  applySettingsToTemplates();
+  applyDynamicContent();
+  renderPensionCards();
+  showToast('설정이 저장되었습니다');
+}
+
+function resetSettings() {
+  if (!confirm('설정을 기본값으로 초기화할까요?')) return;
+  appSettings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
+  try { localStorage.removeItem('pensionTalk_settings'); } catch(e) {}
+  applySettingsToUI();
+  applySettingsToTemplates();
+  applyDynamicContent();
+  renderPensionCards();
+  showToast('기본값으로 초기화되었습니다');
+}
+
+function applySettingsToUI() {
+  document.getElementById('setOwnerName').value = appSettings.ownerName;
+  document.getElementById('setWifiPw').value = appSettings.wifiPw;
+  document.getElementById('setPhone').value = appSettings.phone;
+  document.getElementById('setLocation').value = appSettings.location;
+  document.getElementById('setGreeting').value = appSettings.greeting;
+  document.getElementById('setCheckinTime').value = appSettings.checkinTime;
+  document.getElementById('setCheckoutTime').value = appSettings.checkoutTime;
+  renderPensionSettingsUI();
+}
+
+function renderPensionSettingsUI() {
+  const container = document.getElementById('pensionSettingsList');
+  if (!container) return;
+  const colors = ['var(--blue)','var(--orange)','var(--green)','#8B5CF6'];
+  container.innerHTML = appSettings.pensions.map((p, i) => `
+    <div style="background:var(--white);border:1px solid var(--gray-mid);border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:var(--shadow);border-left:4px solid ${colors[i%4]}">
+      <div style="font-size:14px;font-weight:700;color:var(--navy);margin-bottom:10px">🏡 숙소 ${i+1}</div>
+      <div style="margin-bottom:8px">
+        <label style="font-size:12px;color:var(--gray-dark);display:block;margin-bottom:3px">숙소명</label>
+        <input type="text" id="setPName${i}" value="${p.name}" style="width:100%;padding:8px 10px;border:1px solid var(--gray-mid);border-radius:6px;font-size:14px;outline:none" oninput="saveSettings()">
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <div style="flex:1">
+          <label style="font-size:12px;color:var(--gray-dark);display:block;margin-bottom:3px">배지(태그)</label>
+          <input type="text" id="setPBadge${i}" value="${p.badge}" style="width:100%;padding:8px 10px;border:1px solid var(--gray-mid);border-radius:6px;font-size:13px;outline:none" placeholder="가족추천" oninput="saveSettings()">
+        </div>
+        <div style="flex:1">
+          <label style="font-size:12px;color:var(--gray-dark);display:block;margin-bottom:3px">위치</label>
+          <input type="text" id="setPLoc${i}" value="${p.loc}" style="width:100%;padding:8px 10px;border:1px solid var(--gray-mid);border-radius:6px;font-size:13px;outline:none" placeholder="군산시 ○○동" oninput="saveSettings()">
+        </div>
+      </div>
+      <div style="margin-bottom:8px">
+        <label style="font-size:12px;color:var(--gray-dark);display:block;margin-bottom:3px">특징 (쉼표로 구분)</label>
+        <input type="text" id="setPFeatures${i}" value="${p.features}" style="width:100%;padding:8px 10px;border:1px solid var(--gray-mid);border-radius:6px;font-size:13px;outline:none" placeholder="바비큐장, 잔디마당, 가족단위" oninput="saveSettings()">
+      </div>
+      <div>
+        <label style="font-size:12px;color:var(--gray-dark);display:block;margin-bottom:3px">설명</label>
+        <textarea id="setPDesc${i}" rows="2" style="width:100%;padding:8px 10px;border:1px solid var(--gray-mid);border-radius:6px;font-size:13px;outline:none;resize:vertical" oninput="saveSettings()">${p.desc}</textarea>
+      </div>
+    </div>
+  `).join('') + `
+    <button onclick="addPension()" style="width:100%;padding:10px;background:var(--blue-pale);border:2px dashed var(--blue);color:var(--blue);border-radius:12px;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:8px">+ 숙소 추가</button>
+  `;
+}
+
+function addPension() {
+  appSettings.pensions.push({name:'새 숙소',badge:'',loc:'',features:'',desc:''});
+  saveSettings();
+  applySettingsToUI();
+}
+
+function removePension(idx) {
+  if (appSettings.pensions.length <= 1) { showToast('최소 1개 숙소이 필요합니다'); return; }
+  if (!confirm(appSettings.pensions[idx].name + ' 숙소을 삭제할까요?')) return;
+  appSettings.pensions.splice(idx, 1);
+  saveSettings();
+  applySettingsToUI();
+}
+
+function renderPensionCards() {
+  const container = document.getElementById('pensionList');
+  if (!container) return;
+  const colors = ['var(--blue)','var(--orange)','var(--green)','#8B5CF6','#EC4899','#14B8A6'];
+  container.innerHTML = appSettings.pensions.map((p, i) => {
+    const features = p.features ? p.features.split(',').map(f => `<span class="pension-tag">${f.trim()}</span>`).join('') : '';
+    return `<div class="pension-card">
+      <div class="pension-name">${p.name} ${p.badge ? '<span class="pension-badge" style="background:'+colors[i%colors.length]+'">' + p.badge + '</span>' : ''}</div>
+      ${p.loc ? '<div class="pension-loc">📍 ' + p.loc + '</div>' : ''}
+      ${features ? '<div class="pension-features">' + features + '</div>' : ''}
+      ${p.desc ? '<div class="pension-desc">' + p.desc + '</div>' : ''}
+    </div>`;
+  }).join('');
+  // 홈 탭 운영 숙소 수 업데이트
+  const statNum = document.querySelector('.stat-card .num');
+  if (statNum) statNum.textContent = appSettings.pensions.length;
+}
+
+function applySettingsToTemplates() {
+  const ciTime = appSettings.checkinTime;
+  const coTime = appSettings.checkoutTime;
+  const wifiPw = appSettings.wifiPw;
+
+  TEMPLATES.forEach(t => {
+    if (t.ko.includes('체크인 시간은')) {
+      t.ko = '체크인 시간은 ' + ciTime + '입니다';
+      t.en = 'Check-in time is ' + ciTime;
+      t.ja = 'チェックインは' + ciTime + 'です';
+      t.zh = '入住时间是' + ciTime;
+    }
+    if (t.ko.includes('체크아웃 시간은')) {
+      t.ko = '체크아웃 시간은 ' + coTime + '입니다';
+      t.en = 'Check-out time is ' + coTime;
+      t.ja = 'チェックアウトは' + coTime + 'です';
+      t.zh = '退房时间是' + coTime;
+    }
+    if (t.ko.includes('와이파이 비밀번호는')) {
+      const pw = wifiPw || '___';
+      t.ko = '와이파이 비밀번호는 ' + pw + '입니다';
+      t.en = 'The WiFi password is ' + pw;
+      t.ja = 'WiFiのパスワードは' + pw + 'です';
+      t.zh = 'WiFi密码是' + pw;
+    }
+  });
+  renderTemplates();
+}
+
+function applyDynamicContent() {
+  const heroEl = document.querySelector('.home-hero');
+  if (heroEl) {
+    heroEl.innerHTML = '<h2>안녕하세요, ' + appSettings.ownerName + '님!</h2><p>' + appSettings.greeting.replace(/\n/g, '<br>') + '</p>';
+  }
+}
+
+// ========================
+// INIT
+// ========================
+window.addEventListener('load', function() {
+  updateOnlineStatus();
+  loadSettings();
+  applyDynamicContent();
+  renderLangSelector();
+  renderTemplates();
+  renderPensionCards();
+  setupConvSelects();
+  updateConvLabels();
+  renderQuickPhrases();
+  if (window.speechSynthesis) {
+    window.speechSynthesis.getVoices();
+    window.speechSynthesis.onvoiceschanged = function() { window.speechSynthesis.getVoices(); };
+  }
+});
+</script>
+</body>
+</html>

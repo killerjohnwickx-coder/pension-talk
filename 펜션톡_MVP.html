@@ -1,0 +1,1551 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#E8723A">
+<title>펜션톡 - 숙박 통역 도우미</title>
+<style>
+/* ===== CSS Variables & Theming ===== */
+:root {
+  --primary: #E8723A;
+  --primary-dark: #C95E2B;
+  --primary-light: #F5A76C;
+  --primary-bg: #FFF8F4;
+  --accent: #2D7D9A;
+  --accent-light: #4BA8C8;
+  --success: #4CAF50;
+  --warning: #FF9800;
+  --danger: #F44336;
+  --bg: #FAFAFA;
+  --surface: #FFFFFF;
+  --surface-hover: #FFF3EC;
+  --text: #1A1A1A;
+  --text-secondary: #666666;
+  --text-muted: #999999;
+  --border: #E0E0E0;
+  --border-light: #F0F0F0;
+  --shadow: 0 2px 8px rgba(0,0,0,0.08);
+  --shadow-lg: 0 4px 20px rgba(0,0,0,0.12);
+  --shadow-xl: 0 8px 32px rgba(0,0,0,0.16);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --transition: 0.2s ease;
+  --font: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --header-h: 56px;
+  --bottom-h: 80px;
+}
+
+[data-theme="dark"] {
+  --primary: #F5A76C;
+  --primary-dark: #E8723A;
+  --primary-light: #C95E2B;
+  --primary-bg: #1E1510;
+  --bg: #121212;
+  --surface: #1E1E1E;
+  --surface-hover: #2A2018;
+  --text: #E8E8E8;
+  --text-secondary: #AAAAAA;
+  --text-muted: #777777;
+  --border: #333333;
+  --border-light: #2A2A2A;
+  --shadow: 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-lg: 0 4px 20px rgba(0,0,0,0.4);
+  --shadow-xl: 0 8px 32px rgba(0,0,0,0.5);
+}
+
+/* ===== Reset & Base ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+button { font-family: var(--font); cursor: pointer; border: none; background: none; }
+input, textarea, select { font-family: var(--font); }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+/* ===== App Shell ===== */
+#app {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  min-height: 100dvh;
+  position: relative;
+  background: var(--bg);
+}
+
+/* ===== Header ===== */
+.header {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  height: var(--header-h);
+  background: var(--primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(232,114,58,0.3);
+}
+
+.header-left { display: flex; align-items: center; gap: 8px; }
+.header-logo {
+  font-size: 1.3rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+.header-logo span { font-size: 0.7rem; font-weight: 400; opacity: 0.85; display: block; margin-top: -4px; }
+
+.header-right { display: flex; align-items: center; gap: 4px; }
+
+.header-btn {
+  width: 40px; height: 40px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  color: white;
+  font-size: 1.2rem;
+  transition: background var(--transition);
+}
+.header-btn:hover, .header-btn:active { background: rgba(255,255,255,0.15); }
+
+.lang-select {
+  background: rgba(255,255,255,0.2);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: var(--radius-sm);
+  padding: 6px 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+.lang-select option { color: #333; background: white; }
+
+/* ===== Main Content ===== */
+.main {
+  padding-top: calc(var(--header-h) + 8px);
+  padding-bottom: calc(var(--bottom-h) + 16px);
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* ===== Pension Selector ===== */
+.pension-bar {
+  padding: 8px 16px;
+  overflow-x: auto;
+  display: flex;
+  gap: 8px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.pension-bar::-webkit-scrollbar { display: none; }
+.pension-chip {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  color: var(--text-secondary);
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+.pension-chip.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+.pension-chip:active { transform: scale(0.96); }
+
+/* ===== Sections ===== */
+.section { padding: 0 16px; margin-bottom: 16px; }
+.section-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+  padding-left: 2px;
+}
+
+/* ===== Scenario Grid ===== */
+.scenario-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.scenario-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 14px 6px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 1.5px solid var(--border-light);
+  transition: all var(--transition);
+  min-height: 85px;
+}
+.scenario-card:hover { border-color: var(--primary-light); background: var(--surface-hover); }
+.scenario-card:active { transform: scale(0.96); }
+.scenario-card.active { border-color: var(--primary); background: var(--primary-bg); }
+.scenario-icon { font-size: 1.6rem; }
+.scenario-label { font-size: 0.75rem; font-weight: 600; color: var(--text); text-align: center; line-height: 1.3; }
+
+/* ===== Template Phrases ===== */
+.template-panel {
+  display: none;
+  animation: slideUp 0.25s ease;
+}
+.template-panel.active { display: block; }
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.template-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--primary-bg);
+  border-radius: var(--radius) var(--radius) 0 0;
+  border: 1.5px solid var(--border-light);
+  border-bottom: none;
+}
+.template-header-title { font-size: 0.95rem; font-weight: 700; }
+.template-close {
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  transition: background var(--transition);
+}
+.template-close:hover { background: var(--border-light); }
+
+.template-list {
+  border: 1.5px solid var(--border-light);
+  border-top: none;
+  border-radius: 0 0 var(--radius) var(--radius);
+  overflow: hidden;
+}
+
+.phrase-card {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-light);
+  transition: background var(--transition);
+  cursor: pointer;
+}
+.phrase-card:last-child { border-bottom: none; }
+.phrase-card:hover { background: var(--surface-hover); }
+.phrase-card:active { background: var(--primary-bg); }
+
+.phrase-ko {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.phrase-trans {
+  font-size: 0.88rem;
+  color: var(--accent);
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+.phrase-actions {
+  display: flex;
+  gap: 8px;
+}
+.phrase-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  transition: all var(--transition);
+  background: var(--surface);
+}
+.phrase-btn:hover { border-color: var(--primary); color: var(--primary); }
+.phrase-btn:active { transform: scale(0.95); }
+.phrase-btn svg { width: 14px; height: 14px; }
+
+/* ===== Translation Area ===== */
+.translate-area {
+  margin: 0 16px 16px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 1.5px solid var(--border-light);
+  overflow: hidden;
+}
+
+.translate-input-wrap {
+  position: relative;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.translate-input {
+  width: 100%;
+  border: none;
+  outline: none;
+  font-size: 1rem;
+  color: var(--text);
+  background: transparent;
+  resize: none;
+  min-height: 48px;
+  max-height: 120px;
+  line-height: 1.5;
+}
+.translate-input::placeholder { color: var(--text-muted); }
+
+.translate-input-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.translate-submit {
+  padding: 8px 20px;
+  border-radius: 20px;
+  background: var(--primary);
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 700;
+  transition: all var(--transition);
+}
+.translate-submit:hover { background: var(--primary-dark); }
+.translate-submit:active { transform: scale(0.96); }
+.translate-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.char-count { font-size: 0.75rem; color: var(--text-muted); }
+
+.translate-output {
+  padding: 14px;
+  min-height: 60px;
+  background: var(--primary-bg);
+}
+.translate-output-placeholder {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+.translate-output-text {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.6;
+}
+.translate-output-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/* ===== Voice Button ===== */
+.voice-section {
+  display: flex;
+  justify-content: center;
+  padding: 8px 16px 16px;
+}
+
+.voice-btn {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  box-shadow: 0 4px 16px rgba(232,114,58,0.35);
+  transition: all var(--transition);
+  position: relative;
+}
+.voice-btn:hover { transform: scale(1.05); box-shadow: 0 6px 24px rgba(232,114,58,0.45); }
+.voice-btn:active { transform: scale(0.95); }
+.voice-btn.recording {
+  background: var(--danger);
+  box-shadow: 0 4px 16px rgba(244,67,54,0.4);
+  animation: pulse-rec 1.2s ease infinite;
+}
+
+@keyframes pulse-rec {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(244,67,54,0.4); }
+  50% { box-shadow: 0 0 0 14px rgba(244,67,54,0); }
+}
+
+.voice-status {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 8px;
+}
+.voice-status.active { color: var(--danger); font-weight: 600; }
+
+/* ===== Conversation History ===== */
+.history-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  margin: 0 16px 8px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 1.5px solid var(--border-light);
+  transition: all var(--transition);
+}
+.history-toggle:hover { background: var(--surface-hover); }
+.history-toggle-left { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 0.9rem; }
+.history-badge {
+  background: var(--primary);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 10px;
+}
+.history-chevron {
+  transition: transform var(--transition);
+  color: var(--text-muted);
+}
+.history-toggle.open .history-chevron { transform: rotate(180deg); }
+
+.history-panel {
+  margin: 0 16px 16px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+.history-panel.open { max-height: 600px; overflow-y: auto; }
+
+.history-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  margin-bottom: 8px;
+}
+.history-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+.history-ko { font-size: 0.88rem; font-weight: 600; }
+.history-trans { font-size: 0.85rem; color: var(--accent); }
+
+.history-clear {
+  display: block;
+  margin: 0 auto;
+  padding: 8px 16px;
+  font-size: 0.8rem;
+  color: var(--danger);
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition);
+}
+.history-clear:hover { background: rgba(244,67,54,0.08); }
+
+/* ===== Bottom Nav ===== */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  height: var(--bottom-h);
+  background: var(--surface);
+  border-top: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 100;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-weight: 600;
+  transition: color var(--transition);
+}
+.nav-item.active { color: var(--primary); }
+.nav-item:active { transform: scale(0.95); }
+.nav-icon { font-size: 1.3rem; }
+
+/* ===== Settings Modal ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.25s ease;
+}
+.modal-overlay.active { opacity: 1; visibility: visible; }
+
+.modal-sheet {
+  width: 100%;
+  max-width: 480px;
+  max-height: 85vh;
+  background: var(--surface);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  overflow-y: auto;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+}
+.modal-overlay.active .modal-sheet { transform: translateY(0); }
+
+.modal-handle {
+  width: 36px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin: 10px auto 0;
+}
+.modal-header {
+  padding: 16px 20px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  border-bottom: 1px solid var(--border-light);
+}
+.modal-body { padding: 16px 20px; }
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+.setting-row:last-child { border-bottom: none; }
+.setting-label { font-size: 0.9rem; font-weight: 500; }
+.setting-desc { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+
+/* Toggle Switch */
+.toggle {
+  position: relative;
+  width: 48px;
+  height: 28px;
+  cursor: pointer;
+}
+.toggle input { display: none; }
+.toggle-track {
+  position: absolute;
+  inset: 0;
+  background: var(--border);
+  border-radius: 14px;
+  transition: background var(--transition);
+}
+.toggle input:checked + .toggle-track { background: var(--primary); }
+.toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 24px;
+  height: 24px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  transition: left var(--transition);
+}
+.toggle input:checked ~ .toggle-thumb { left: 22px; }
+
+/* Pension Info Modal */
+.pension-info {
+  padding: 16px;
+}
+.pension-info-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.pension-info-addr {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+.pension-info-detail {
+  font-size: 0.85rem;
+  line-height: 1.8;
+  color: var(--text-secondary);
+}
+
+/* ===== Toast ===== */
+.toast {
+  position: fixed;
+  bottom: calc(var(--bottom-h) + 16px);
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--text);
+  color: var(--bg);
+  padding: 10px 20px;
+  border-radius: 24px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  z-index: 300;
+  opacity: 0;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  max-width: 90%;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ===== Loading Spinner ===== */
+.spinner {
+  display: inline-block;
+  width: 18px; height: 18px;
+  border: 2px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ===== Empty State ===== */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-muted);
+}
+.empty-state-icon { font-size: 3rem; margin-bottom: 12px; }
+.empty-state-text { font-size: 0.9rem; line-height: 1.6; }
+
+/* ===== View Switching ===== */
+.view { display: none; }
+.view.active { display: block; }
+
+/* ===== Responsive ===== */
+@media (min-width: 481px) {
+  #app { border-left: 1px solid var(--border-light); border-right: 1px solid var(--border-light); }
+}
+
+/* ===== Accessibility ===== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/* ===== Print ===== */
+@media print {
+  .header, .bottom-nav, .voice-section { display: none !important; }
+  .main { padding: 0; }
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <!-- ===== Header ===== -->
+  <header class="header">
+    <div class="header-left">
+      <div class="header-logo">
+        펜션톡
+        <span>숙박 통역 도우미</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <select class="lang-select" id="langSelect" aria-label="번역 언어 선택">
+        <option value="en">영어 EN</option>
+        <option value="ja">일본어 JA</option>
+        <option value="zh">중국어 ZH</option>
+      </select>
+      <button class="header-btn" id="themeToggle" aria-label="테마 전환" title="다크/라이트 모드">🌙</button>
+      <button class="header-btn" id="settingsBtn" aria-label="설정" title="설정">⚙️</button>
+    </div>
+  </header>
+
+  <!-- ===== Main Content ===== -->
+  <main class="main">
+
+    <!-- Home View -->
+    <div class="view active" id="viewHome">
+
+      <!-- Pension Selector -->
+      <div class="pension-bar" id="pensionBar">
+        <button class="pension-chip active" data-pension="0">전체</button>
+        <button class="pension-chip" data-pension="1">따숨과이룸</button>
+        <button class="pension-chip" data-pension="2">팔레드군산</button>
+        <button class="pension-chip" data-pension="3">군산꿀잠</button>
+        <button class="pension-chip" data-pension="4">월명동 해피하우스</button>
+      </div>
+
+      <!-- Scenario Grid -->
+      <div class="section">
+        <div class="section-title">상황별 템플릿</div>
+        <div class="scenario-grid" id="scenarioGrid">
+          <button class="scenario-card" data-scenario="checkin">
+            <div class="scenario-icon">🏠</div>
+            <div class="scenario-label">체크인<br>안내</div>
+          </button>
+          <button class="scenario-card" data-scenario="checkout">
+            <div class="scenario-icon">👋</div>
+            <div class="scenario-label">체크아웃<br>안내</div>
+          </button>
+          <button class="scenario-card" data-scenario="facilities">
+            <div class="scenario-icon">🏊</div>
+            <div class="scenario-label">시설<br>안내</div>
+          </button>
+          <button class="scenario-card" data-scenario="local">
+            <div class="scenario-icon">🗺️</div>
+            <div class="scenario-label">관광지<br>맛집</div>
+          </button>
+          <button class="scenario-card" data-scenario="complaint">
+            <div class="scenario-icon">🔧</div>
+            <div class="scenario-label">클레임<br>처리</div>
+          </button>
+          <button class="scenario-card" data-scenario="reservation">
+            <div class="scenario-icon">📅</div>
+            <div class="scenario-label">예약<br>변경</div>
+          </button>
+          <button class="scenario-card" data-scenario="transport">
+            <div class="scenario-icon">🚕</div>
+            <div class="scenario-label">교통<br>안내</div>
+          </button>
+          <button class="scenario-card" data-scenario="emergency">
+            <div class="scenario-icon">🚨</div>
+            <div class="scenario-label">긴급<br>상황</div>
+          </button>
+          <button class="scenario-card" data-scenario="payment">
+            <div class="scenario-icon">💳</div>
+            <div class="scenario-label">결제<br>관련</div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Template Phrases Panel -->
+      <div class="section">
+        <div class="template-panel" id="templatePanel">
+          <div class="template-header">
+            <div class="template-header-title" id="templateTitle"></div>
+            <button class="template-close" id="templateClose" aria-label="닫기">✕</button>
+          </div>
+          <div class="template-list" id="templateList"></div>
+        </div>
+      </div>
+
+      <!-- Voice Input -->
+      <div class="voice-section">
+        <div style="text-align:center">
+          <button class="voice-btn" id="voiceBtn" aria-label="음성 인식">🎤</button>
+          <div class="voice-status" id="voiceStatus">마이크 버튼을 눌러 말씀하세요</div>
+        </div>
+      </div>
+
+      <!-- Free Text Translation -->
+      <div class="translate-area">
+        <div class="translate-input-wrap">
+          <textarea class="translate-input" id="translateInput" placeholder="한국어로 입력하세요..." rows="2" maxlength="500"></textarea>
+        </div>
+        <div class="translate-input-actions">
+          <span class="char-count" id="charCount">0/500</span>
+          <button class="translate-submit" id="translateBtn">번역하기</button>
+        </div>
+        <div class="translate-output" id="translateOutput">
+          <div class="translate-output-placeholder">번역 결과가 여기에 표시됩니다</div>
+        </div>
+      </div>
+
+      <!-- History -->
+      <button class="history-toggle" id="historyToggle">
+        <div class="history-toggle-left">
+          📝 대화 기록 <span class="history-badge" id="historyBadge">0</span>
+        </div>
+        <span class="history-chevron">▼</span>
+      </button>
+      <div class="history-panel" id="historyPanel">
+        <div id="historyList"></div>
+        <button class="history-clear" id="historyClear">기록 전체 삭제</button>
+      </div>
+
+    </div>
+
+    <!-- Pension Info View -->
+    <div class="view" id="viewPension">
+      <div class="section" style="padding-top:8px">
+        <div class="section-title">내 펜션 정보</div>
+        <div id="pensionInfoCards"></div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ===== Bottom Nav ===== -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-view="viewHome">
+      <span class="nav-icon">💬</span>
+      통역
+    </button>
+    <button class="nav-item" data-view="viewPension">
+      <span class="nav-icon">🏡</span>
+      내 펜션
+    </button>
+  </nav>
+
+  <!-- ===== Settings Modal ===== -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-header">설정</div>
+      <div class="modal-body">
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">다크 모드</div>
+            <div class="setting-desc">어두운 화면 테마를 사용합니다</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="darkModeToggle">
+            <div class="toggle-track"></div>
+            <div class="toggle-thumb"></div>
+          </label>
+        </div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">음성 자동 재생</div>
+            <div class="setting-desc">번역 결과를 자동으로 읽어줍니다</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" id="autoTTSToggle">
+            <div class="toggle-track"></div>
+            <div class="toggle-thumb"></div>
+          </label>
+        </div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">음성 속도</div>
+            <div class="setting-desc">TTS 말하기 속도 조절</div>
+          </div>
+          <select id="ttsSpeed" style="padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:0.85rem;">
+            <option value="0.7">느리게</option>
+            <option value="1" selected>보통</option>
+            <option value="1.3">빠르게</option>
+          </select>
+        </div>
+        <div class="setting-row">
+          <div>
+            <div class="setting-label">앱 버전</div>
+            <div class="setting-desc">펜션톡 MVP v1.0.0</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+/* =======================================================
+   펜션톡 (PensionTalk) - 숙박 통역 도우미
+   Single-file MVP Application
+   ======================================================= */
+
+// ===== TEMPLATE DATA =====
+const TEMPLATES = {
+  checkin: {
+    title: '🏠 체크인 안내',
+    phrases: [
+      {ko:'안녕하세요, 환영합니다! 예약하신 성함이 어떻게 되시나요?',en:'Hello, welcome! May I have your reservation name?',ja:'こんにちは、ようこそ！ご予約のお名前をお願いします。',zh:'您好，欢迎光临！请问您的预订姓名是？'},
+      {ko:'체크인 시간은 오후 3시입니다.',en:'Check-in time is 3:00 PM.',ja:'チェックイン時間は午後3時です。',zh:'入住时间是下午3点。'},
+      {ko:'객실 비밀번호는 1234입니다. 도어락에 입력해 주세요.',en:'Your room password is 1234. Please enter it on the door lock.',ja:'お部屋の暗証番号は1234です。ドアロックに入力してください。',zh:'房间密码是1234，请在门锁上输入。'},
+      {ko:'배정된 방은 201호입니다.',en:'Your assigned room is Room 201.',ja:'お部屋は201号室になります。',zh:'分配给您的房间是201号。'},
+      {ko:'신분증(여권)을 확인할 수 있을까요?',en:'May I see your ID (passport)?',ja:'身分証（パスポート）を確認させていただけますか？',zh:'可以出示一下您的身份证（护照）吗？'},
+      {ko:'와이파이 이름은 "Pension_Guest"이고 비밀번호는 "welcome2024"입니다.',en:'The Wi-Fi name is "Pension_Guest" and the password is "welcome2024".',ja:'Wi-Fi名は「Pension_Guest」、パスワードは「welcome2024」です。',zh:'Wi-Fi名称是"Pension_Guest"，密码是"welcome2024"。'},
+      {ko:'조식은 오전 8시부터 10시까지 1층 식당에서 제공됩니다.',en:'Breakfast is served from 8 AM to 10 AM in the 1st floor dining area.',ja:'朝食は午前8時から10時まで1階の食堂で提供されます。',zh:'早餐在一楼餐厅供应，时间为上午8点至10点。'},
+      {ko:'주차장은 건물 앞에 있으며, 무료입니다.',en:'The parking lot is in front of the building and it is free.',ja:'駐車場は建物の前にあり、無料です。',zh:'停车场在大楼前面，免费使用。'},
+      {ko:'짐은 프런트에 맡기실 수 있습니다.',en:'You can leave your luggage at the front desk.',ja:'荷物はフロントでお預かりできます。',zh:'行李可以寄存在前台。'},
+      {ko:'비상구는 복도 끝에 있습니다. 비상시 계단을 이용해 주세요.',en:'The emergency exit is at the end of the hallway. Please use the stairs in an emergency.',ja:'非常口は廊下の奥にあります。緊急時は階段をご利用ください。',zh:'紧急出口在走廊尽头。紧急情况请走楼梯。'},
+      {ko:'엘리베이터는 로비 오른쪽에 있습니다.',en:'The elevator is on the right side of the lobby.',ja:'エレベーターはロビーの右側にあります。',zh:'电梯在大厅右侧。'},
+      {ko:'궁금한 점이 있으시면 언제든 프런트로 연락해 주세요.',en:'If you have any questions, please contact the front desk anytime.',ja:'ご不明な点がございましたら、いつでもフロントにご連絡ください。',zh:'如有任何疑问，请随时联系前台。'}
+    ]
+  },
+  checkout: {
+    title: '👋 체크아웃 안내',
+    phrases: [
+      {ko:'체크아웃 시간은 오전 11시입니다.',en:'Check-out time is 11:00 AM.',ja:'チェックアウト時間は午前11時です。',zh:'退房时间是上午11点。'},
+      {ko:'키(카드키)를 프런트에 반납해 주세요.',en:'Please return the key (card key) to the front desk.',ja:'鍵（カードキー）をフロントにご返却ください。',zh:'请将钥匙（房卡）归还到前台。'},
+      {ko:'미니바 이용 내역을 확인하겠습니다.',en:'Let me check your minibar usage.',ja:'ミニバーのご利用内容を確認いたします。',zh:'我来确认一下迷你吧的使用情况。'},
+      {ko:'체크아웃 후에도 짐을 맡기실 수 있습니다.',en:'You can leave your luggage even after check-out.',ja:'チェックアウト後も荷物をお預かりできます。',zh:'退房后也可以寄存行李。'},
+      {ko:'택시를 불러 드릴까요?',en:'Would you like me to call a taxi for you?',ja:'タクシーをお呼びしましょうか？',zh:'需要我帮您叫出租车吗？'},
+      {ko:'영수증을 발행해 드릴까요?',en:'Would you like me to issue a receipt?',ja:'領収書を発行いたしましょうか？',zh:'需要开发票/收据吗？'},
+      {ko:'숙박은 만족스러우셨나요?',en:'Was your stay satisfactory?',ja:'ご滞在はご満足いただけましたか？',zh:'您对住宿还满意吗？'},
+      {ko:'다음 방문 시 10% 할인 쿠폰을 드립니다.',en:'Here is a 10% discount coupon for your next visit.',ja:'次回ご来訪時の10%割引クーポンをお渡しします。',zh:'这是您下次来访时的九折优惠券。'},
+      {ko:'온라인 리뷰를 남겨 주시면 감사하겠습니다.',en:'We would appreciate it if you could leave an online review.',ja:'オンラインレビューを残していただけると幸いです。',zh:'如果您能留下在线评价，我们将非常感激。'},
+      {ko:'이용해 주셔서 감사합니다. 또 방문해 주세요!',en:'Thank you for staying with us. Please visit again!',ja:'ご利用ありがとうございました。またのお越しをお待ちしております！',zh:'感谢您的入住，欢迎再次光临！'},
+      {ko:'잊으신 물건이 없는지 확인해 주세요.',en:'Please make sure you have not left anything behind.',ja:'お忘れ物がないかご確認ください。',zh:'请确认没有遗落物品。'},
+      {ko:'공항까지 가는 방법을 안내해 드릴까요?',en:'Would you like directions to the airport?',ja:'空港までの行き方をご案内しましょうか？',zh:'需要我告诉您去机场的路线吗？'}
+    ]
+  },
+  facilities: {
+    title: '🏊 시설 안내',
+    phrases: [
+      {ko:'와이파이는 건물 전체에서 사용 가능합니다.',en:'Wi-Fi is available throughout the building.',ja:'Wi-Fiは建物全体でご利用いただけます。',zh:'整栋建筑都可以使用Wi-Fi。'},
+      {ko:'주차장은 건물 뒤편에 있으며 10대까지 주차 가능합니다.',en:'The parking lot is behind the building and can accommodate up to 10 cars.',ja:'駐車場は建物の裏にあり、10台まで駐車可能です。',zh:'停车场在建筑物后面，最多可停10辆车。'},
+      {ko:'주방에 조리기구와 식기가 준비되어 있습니다.',en:'Cooking utensils and tableware are available in the kitchen.',ja:'キッチンに調理器具と食器が揃っています。',zh:'厨房里备有炊具和餐具。'},
+      {ko:'세탁기는 1층 공용 공간에 있습니다. 무료로 사용하실 수 있습니다.',en:'The washing machine is in the 1st floor common area. It is free to use.',ja:'洗濯機は1階の共用スペースにあります。無料でご利用いただけます。',zh:'洗衣机在一楼公共区域，免费使用。'},
+      {ko:'에어컨과 난방은 객실 리모컨으로 조절하실 수 있습니다.',en:'You can adjust the AC and heating with the room remote control.',ja:'エアコンと暖房はお部屋のリモコンで調節できます。',zh:'空调和暖气可以用房间遥控器调节。'},
+      {ko:'야외 바베큐장이 있습니다. 사전 예약이 필요합니다.',en:'There is an outdoor BBQ area. Advance reservation is required.',ja:'屋外バーベキュー場があります。事前予約が必要です。',zh:'有室外烧烤区，需要提前预约。'},
+      {ko:'TV 리모컨은 침대 옆 서랍에 있습니다.',en:'The TV remote is in the bedside drawer.',ja:'テレビのリモコンはベッドサイドの引き出しにあります。',zh:'电视遥控器在床头柜抽屉里。'},
+      {ko:'객실 내 금고를 이용하실 수 있습니다. 비밀번호를 직접 설정해 주세요.',en:'You can use the in-room safe. Please set your own password.',ja:'客室内の金庫をご利用いただけます。暗証番号をご自身で設定してください。',zh:'可以使用房间内的保险箱，请自行设置密码。'},
+      {ko:'욕실에 수건, 치약, 샴푸 등이 비치되어 있습니다.',en:'Towels, toothpaste, shampoo, etc. are provided in the bathroom.',ja:'バスルームにタオル、歯磨き粉、シャンプーなどが備え付けてあります。',zh:'浴室里备有毛巾、牙膏、洗发水等。'},
+      {ko:'비상용품(소화기, 구급상자)은 각 층 복도에 비치되어 있습니다.',en:'Emergency supplies (fire extinguisher, first aid kit) are on each floor hallway.',ja:'非常用品（消火器、救急箱）は各階の廊下に設置されています。',zh:'应急用品（灭火器、急救箱）放置在每层走廊。'},
+      {ko:'수영장 이용 시간은 오전 9시부터 오후 8시까지입니다.',en:'Swimming pool hours are from 9 AM to 8 PM.',ja:'プールのご利用時間は午前9時から午後8時までです。',zh:'游泳池开放时间为上午9点至晚上8点。'}
+    ]
+  },
+  local: {
+    title: '🗺️ 주변 관광지/맛집',
+    phrases: [
+      {ko:'새만금 방조제는 차로 약 30분 거리입니다. 세계 최장 방조제입니다.',en:'Saemangeum Seawall is about 30 minutes by car. It is the world\'s longest seawall.',ja:'セマングム防潮堤は車で約30分です。世界最長の防潮堤です。',zh:'新万金防潮堤开车约30分钟，是世界最长的防潮堤。'},
+      {ko:'경암동 철길마을은 도보로 약 15분 거리입니다. 레트로 감성이 인기입니다.',en:'Gyeongam-dong Railroad Village is about 15 minutes on foot. The retro atmosphere is popular.',ja:'慶岩洞鉄道村は徒歩約15分です。レトロな雰囲気が人気です。',zh:'庆岩洞铁路村步行约15分钟，复古氛围很受欢迎。'},
+      {ko:'군산근대역사박물관은 차로 10분 거리입니다. 일제강점기 역사를 볼 수 있습니다.',en:'Gunsan Modern History Museum is 10 minutes by car. You can learn about the Japanese colonial period.',ja:'群山近代歴史博物館は車で10分です。日本統治時代の歴史を見ることができます。',zh:'群山近代历史博物馆开车10分钟，可以了解日本殖民时期的历史。'},
+      {ko:'이성당은 한국에서 가장 오래된 빵집입니다. 단팥빵과 야채빵이 유명합니다.',en:'Lee Sung Dang is the oldest bakery in Korea. The red bean bread and vegetable bread are famous.',ja:'イソンダンは韓国で最も古いパン屋です。あんパンと野菜パンが有名です。',zh:'李盛堂是韩国最古老的面包店，红豆面包和蔬菜面包很有名。'},
+      {ko:'초원사진관은 영화 "8월의 크리스마스" 촬영지입니다.',en:'Chowon Photo Studio is the filming location of the movie "Christmas in August".',ja:'草原写真館は映画「8月のクリスマス」のロケ地です。',zh:'草原照相馆是电影《八月的圣诞节》的拍摄地。'},
+      {ko:'중동호떡은 군산의 유명한 길거리 음식입니다. 꼭 드셔보세요!',en:'Jungdong Hotteok is a famous street food in Gunsan. You must try it!',ja:'中東ホットクは群山で有名な屋台グルメです。ぜひ食べてみてください！',zh:'中洞糖饼是群山著名的街头小吃，一定要尝尝！'},
+      {ko:'택시나 버스로 이동하실 수 있습니다. 도움이 필요하시면 말씀해 주세요.',en:'You can get there by taxi or bus. Let me know if you need help.',ja:'タクシーやバスで移動できます。お手伝いが必要でしたらお知らせください。',zh:'可以坐出租车或公交车去。如果需要帮助请告诉我。'},
+      {ko:'여기서 약 20분 정도 소요됩니다.',en:'It takes about 20 minutes from here.',ja:'ここから約20分ほどかかります。',zh:'从这里大约需要20分钟。'},
+      {ko:'영업시간은 오전 10시부터 오후 6시까지입니다. 월요일은 휴무입니다.',en:'Business hours are 10 AM to 6 PM. Closed on Mondays.',ja:'営業時間は午前10時から午後6時までです。月曜日は定休日です。',zh:'营业时间为上午10点至下午6点，周一休息。'},
+      {ko:'예약을 도와드릴까요? 전화번호를 알려드리겠습니다.',en:'Shall I help you make a reservation? I will give you the phone number.',ja:'ご予約のお手伝いをしましょうか？電話番号をお伝えします。',zh:'需要我帮您预约吗？我告诉您电话号码。'},
+      {ko:'군산 내항 일대에 카페와 식당이 많이 있습니다.',en:'There are many cafes and restaurants around Gunsan Inner Harbor.',ja:'群山内港周辺にはカフェやレストランがたくさんあります。',zh:'群山内港周边有很多咖啡馆和餐厅。'}
+    ]
+  },
+  complaint: {
+    title: '🔧 클레임 처리',
+    phrases: [
+      {ko:'불편을 드려 정말 죄송합니다.',en:'We are truly sorry for the inconvenience.',ja:'ご不便をおかけして大変申し訳ございません。',zh:'非常抱歉给您带来不便。'},
+      {ko:'소음 문제에 대해 바로 조치하겠습니다.',en:'We will take immediate action regarding the noise issue.',ja:'騒音の問題について、すぐに対処いたします。',zh:'我们会立即处理噪音问题。'},
+      {ko:'객실 청소를 다시 해 드리겠습니다. 잠시만 기다려 주세요.',en:'We will re-clean your room. Please wait a moment.',ja:'お部屋の清掃をやり直します。少々お待ちください。',zh:'我们会重新打扫房间，请稍等。'},
+      {ko:'고장 난 시설을 바로 수리하겠습니다.',en:'We will repair the broken facility right away.',ja:'故障した設備をすぐに修理いたします。',zh:'我们会立即修理损坏的设施。'},
+      {ko:'냉난방이 작동하지 않나요? 바로 확인하겠습니다.',en:'Is the heating/cooling not working? We will check it right away.',ja:'冷暖房が動かないですか？すぐに確認いたします。',zh:'暖气/空调不工作吗？我们马上检查。'},
+      {ko:'해충 문제가 있으시군요. 즉시 방역 조치를 하겠습니다.',en:'I see there is a pest issue. We will take pest control measures immediately.',ja:'害虫の問題ですね。直ちに防除措置を取ります。',zh:'有害虫问题，我们会立即进行消杀处理。'},
+      {ko:'다른 객실로 교체해 드리겠습니다.',en:'We will move you to a different room.',ja:'別のお部屋に変更いたします。',zh:'我们帮您换到其他房间。'},
+      {ko:'환불 절차를 안내해 드리겠습니다.',en:'I will guide you through the refund process.',ja:'返金手続きについてご案内いたします。',zh:'我来为您说明退款流程。'},
+      {ko:'보상으로 다음 숙박 시 20% 할인을 제공해 드리겠습니다.',en:'As compensation, we will offer a 20% discount on your next stay.',ja:'補償として次回ご宿泊時に20%割引を提供いたします。',zh:'作为补偿，下次入住我们提供八折优惠。'},
+      {ko:'이런 일이 재발하지 않도록 최선을 다하겠습니다.',en:'We will do our best to ensure this does not happen again.',ja:'このようなことが再発しないよう最善を尽くします。',zh:'我们会尽最大努力确保此类问题不再发生。'},
+      {ko:'담당자에게 바로 전달하겠습니다.',en:'I will report this to the person in charge immediately.',ja:'担当者にすぐにお伝えします。',zh:'我会立即转达给负责人。'}
+    ]
+  },
+  reservation: {
+    title: '📅 예약 변경/취소',
+    phrases: [
+      {ko:'숙박 날짜를 변경하고 싶으신가요? 희망 날짜를 알려주세요.',en:'Would you like to change your stay dates? Please tell me your preferred dates.',ja:'宿泊日を変更されたいですか？ご希望の日程をお知らせください。',zh:'想要更改入住日期吗？请告诉我您希望的日期。'},
+      {ko:'투숙 인원을 변경하시겠습니까?',en:'Would you like to change the number of guests?',ja:'宿泊人数を変更されますか？',zh:'需要更改入住人数吗？'},
+      {ko:'더 넓은 객실로 업그레이드를 원하시나요? 추가 요금이 발생합니다.',en:'Would you like to upgrade to a larger room? An additional fee applies.',ja:'より広いお部屋へのアップグレードをご希望ですか？追加料金が発生します。',zh:'想升级到更大的房间吗？需要额外费用。'},
+      {ko:'연박을 추가하시겠습니까? 연박 할인이 적용됩니다.',en:'Would you like to extend your stay? A multi-night discount applies.',ja:'連泊を追加されますか？連泊割引が適用されます。',zh:'需要续住吗？续住有折扣优惠。'},
+      {ko:'취소 정책을 안내해 드리겠습니다. 3일 전까지 무료 취소가 가능합니다.',en:'Let me explain our cancellation policy. Free cancellation is available up to 3 days before.',ja:'キャンセルポリシーをご案内します。3日前まで無料キャンセルが可能です。',zh:'我来说明取消政策。3天前可以免费取消。'},
+      {ko:'당일 취소 시 1박 요금의 50%가 취소 수수료로 부과됩니다.',en:'For same-day cancellation, 50% of one night\'s fee will be charged.',ja:'当日キャンセルの場合、1泊料金の50%がキャンセル料として請求されます。',zh:'当天取消将收取一晚房费的50%作为取消费。'},
+      {ko:'환불은 3~5 영업일 내에 처리됩니다.',en:'Refunds are processed within 3-5 business days.',ja:'返金は3～5営業日以内に処理されます。',zh:'退款将在3-5个工作日内处理。'},
+      {ko:'대기자 명단에 등록해 드릴까요?',en:'Would you like me to put you on the waiting list?',ja:'ウェイティングリストに登録いたしましょうか？',zh:'需要我把您加入等候名单吗？'},
+      {ko:'특별 요청 사항이 있으시면 말씀해 주세요.',en:'Please let me know if you have any special requests.',ja:'特別なご要望がございましたらお知らせください。',zh:'如果有特殊要求请告诉我。'},
+      {ko:'예약 변경이 완료되었습니다. 확인 메시지를 보내드리겠습니다.',en:'Your reservation has been updated. We will send you a confirmation message.',ja:'ご予約の変更が完了しました。確認メッセージをお送りします。',zh:'预订已更改完成，我们会发送确认信息给您。'}
+    ]
+  },
+  transport: {
+    title: '🚕 교통 안내',
+    phrases: [
+      {ko:'택시를 불러 드리겠습니다. 목적지가 어디인가요?',en:'I will call a taxi for you. What is your destination?',ja:'タクシーをお呼びします。目的地はどちらですか？',zh:'我帮您叫出租车，目的地是哪里？'},
+      {ko:'가까운 버스 정류장은 도보 5분 거리에 있습니다.',en:'The nearest bus stop is a 5-minute walk from here.',ja:'最寄りのバス停は徒歩5分の場所にあります。',zh:'最近的公交站步行5分钟。'},
+      {ko:'군산역까지 택시로 약 15분, 요금은 약 7,000원입니다.',en:'It\'s about 15 minutes by taxi to Gunsan Station, and the fare is about 7,000 won.',ja:'群山駅までタクシーで約15分、料金は約7,000ウォンです。',zh:'到群山站坐出租车约15分钟，费用约7000韩元。'},
+      {ko:'인천공항까지는 KTX나 고속버스를 이용하실 수 있습니다.',en:'You can take KTX or express bus to Incheon Airport.',ja:'仁川空港まではKTXや高速バスをご利用いただけます。',zh:'去仁川机场可以乘坐KTX或高速巴士。'},
+      {ko:'렌터카를 이용하시려면 국제운전면허증이 필요합니다.',en:'You need an international driving permit to rent a car.',ja:'レンタカーをご利用の場合は国際運転免許証が必要です。',zh:'租车需要国际驾照。'},
+      {ko:'관광지까지 걸어서 갈 수 있는 거리입니다.',en:'The tourist spot is within walking distance.',ja:'観光地までは歩いて行ける距離です。',zh:'景点在步行范围内。'},
+      {ko:'여기서 약 30분 정도 소요됩니다.',en:'It takes about 30 minutes from here.',ja:'ここから約30分ほどかかります。',zh:'从这里大约需要30分钟。'},
+      {ko:'교통카드는 편의점에서 구매하실 수 있습니다.',en:'You can buy a transportation card at a convenience store.',ja:'交通カードはコンビニで購入できます。',zh:'交通卡可以在便利店购买。'},
+      {ko:'네비게이션에 이 주소를 입력하시면 됩니다.',en:'You can enter this address in your navigation app.',ja:'ナビにこの住所を入力してください。',zh:'在导航里输入这个地址就可以了。'},
+      {ko:'픽업 서비스를 제공해 드리겠습니다. 도착 시간을 알려주세요.',en:'We offer a pickup service. Please let us know your arrival time.',ja:'ピックアップサービスを提供いたします。到着時間をお知らせください。',zh:'我们提供接送服务，请告知到达时间。'},
+      {ko:'카카오택시 앱을 사용하시면 편리하게 택시를 부르실 수 있습니다.',en:'You can conveniently call a taxi using the Kakao Taxi app.',ja:'カカオタクシーアプリを使えば便利にタクシーを呼べます。',zh:'使用Kakao Taxi应用可以方便地叫出租车。'}
+    ]
+  },
+  emergency: {
+    title: '🚨 긴급 상황',
+    phrases: [
+      {ko:'119에 전화하겠습니다. 소방/구급 서비스입니다.',en:'I will call 119. This is the fire/emergency medical service.',ja:'119に電話します。消防・救急サービスです。',zh:'我会拨打119，这是消防/急救服务。'},
+      {ko:'경찰에 연락해야 합니다. 한국 경찰 번호는 112입니다.',en:'We need to contact the police. The Korean police number is 112.',ja:'警察に連絡する必要があります。韓国の警察番号は112です。',zh:'需要联系警察，韩国报警电话是112。'},
+      {ko:'화재가 발생했습니다! 비상구로 대피해 주세요!',en:'There is a fire! Please evacuate through the emergency exit!',ja:'火災が発生しました！非常口から避難してください！',zh:'发生火灾！请从紧急出口撤离！'},
+      {ko:'응급 처치 키트가 프런트에 있습니다.',en:'The first aid kit is at the front desk.',ja:'応急処置キットはフロントにあります。',zh:'急救箱在前台。'},
+      {ko:'가까운 병원은 차로 10분 거리에 있습니다. 안내해 드리겠습니다.',en:'The nearest hospital is 10 minutes by car. I will guide you.',ja:'最寄りの病院は車で10分の距離にあります。ご案内します。',zh:'最近的医院开车10分钟，我来给您指路。'},
+      {ko:'가까운 약국 위치를 알려드리겠습니다.',en:'I will tell you the location of the nearest pharmacy.',ja:'最寄りの薬局の場所をお知らせします。',zh:'我告诉您最近药店的位置。'},
+      {ko:'분실물이 있으신가요? 어디서 잃어버리셨는지 알려주세요.',en:'Did you lose something? Please tell me where you lost it.',ja:'紛失物がありますか？どこで失くされたかお知らせください。',zh:'丢了东西吗？请告诉我在哪里丢的。'},
+      {ko:'태풍(자연재해) 경보가 발령되었습니다. 실내에 머물러 주세요.',en:'A typhoon (natural disaster) warning has been issued. Please stay indoors.',ja:'台風（自然災害）警報が発令されました。屋内にとどまってください。',zh:'台风（自然灾害）预警已发布，请留在室内。'},
+      {ko:'정전이 되었습니다. 비상 조명을 켜겠습니다. 곧 복구될 예정입니다.',en:'There is a power outage. We will turn on emergency lights. It will be restored soon.',ja:'停電が発生しました。非常灯を点けます。間もなく復旧する予定です。',zh:'停电了，我们会打开应急灯，很快会恢复供电。'},
+      {ko:'비상 연락처: 관리자 010-XXXX-XXXX, 경찰 112, 소방 119',en:'Emergency contacts: Manager 010-XXXX-XXXX, Police 112, Fire 119',ja:'緊急連絡先：管理者 010-XXXX-XXXX、警察 112、消防 119',zh:'紧急联系方式：管理员 010-XXXX-XXXX，报警 112，消防 119'},
+      {ko:'침착하게 행동해 주세요. 제가 도와드리겠습니다.',en:'Please stay calm. I will help you.',ja:'落ち着いて行動してください。私がお手伝いします。',zh:'请保持冷静，我来帮助您。'}
+    ]
+  },
+  payment: {
+    title: '💳 결제 관련',
+    phrases: [
+      {ko:'결제는 어떤 방법으로 하시겠습니까?',en:'How would you like to pay?',ja:'お支払い方法はいかがなさいますか？',zh:'请问您想用什么方式付款？'},
+      {ko:'신용카드 결제가 가능합니다. 비자, 마스터카드 모두 됩니다.',en:'Credit card payment is available. We accept both Visa and Mastercard.',ja:'クレジットカードでのお支払いが可能です。Visa、Mastercardどちらも使えます。',zh:'可以刷信用卡，Visa和万事达都可以。'},
+      {ko:'현금으로 결제하시겠습니까?',en:'Would you like to pay in cash?',ja:'現金でお支払いになりますか？',zh:'您要用现金支付吗？'},
+      {ko:'계좌이체도 가능합니다. 계좌번호를 안내해 드리겠습니다.',en:'Bank transfer is also available. I will provide you with the account number.',ja:'銀行振込も可能です。口座番号をご案内します。',zh:'也可以银行转账，我告诉您账号。'},
+      {ko:'영수증을 출력해 드리겠습니다.',en:'I will print a receipt for you.',ja:'領収書を印刷いたします。',zh:'我给您打印收据。'},
+      {ko:'추가 요금이 발생했습니다. 내역을 확인해 주세요.',en:'Additional charges have been incurred. Please check the details.',ja:'追加料金が発生しました。明細をご確認ください。',zh:'产生了额外费用，请确认明细。'},
+      {ko:'보증금은 체크아웃 시 반환됩니다.',en:'The deposit will be returned at check-out.',ja:'保証金はチェックアウト時に返金されます。',zh:'押金在退房时退还。'},
+      {ko:'환불 처리를 해 드리겠습니다. 3~5일 정도 소요됩니다.',en:'I will process the refund. It takes about 3-5 days.',ja:'返金処理をいたします。3～5日ほどかかります。',zh:'我来办理退款，大约需要3-5天。'},
+      {ko:'장기 숙박 할인이 적용됩니다. 10% 할인됩니다.',en:'A long-stay discount applies. You get a 10% discount.',ja:'長期滞在割引が適用されます。10%割引になります。',zh:'适用长住折扣，打九折。'},
+      {ko:'부가세(VAT) 10%가 포함된 금액입니다.',en:'The amount includes 10% VAT.',ja:'付加価値税（VAT）10%を含んだ金額です。',zh:'金额包含10%增值税。'},
+      {ko:'총 금액은 15만 원입니다.',en:'The total amount is 150,000 won.',ja:'合計金額は15万ウォンです。',zh:'总金额为15万韩元。'}
+    ]
+  }
+};
+
+// ===== PENSION DATA =====
+const PENSIONS = [
+  { id: 1, name: '따숨과이룸', addr: '전북 군산시 소재', desc: '따뜻하고 아늑한 감성 펜션. 가족 단위 숙박에 적합하며, 넓은 거실과 BBQ 시설을 갖추고 있습니다.', tel: '063-XXX-XXXX' },
+  { id: 2, name: '팔레드군산', addr: '전북 군산시 소재', desc: '모던 인테리어의 깔끔한 펜션. 커플 및 소그룹 여행자에게 인기가 있으며 근대역사거리 인근에 위치합니다.', tel: '063-XXX-XXXX' },
+  { id: 3, name: '군산꿀잠', addr: '전북 군산시 소재', desc: '편안한 숙면을 위한 프리미엄 침구를 갖춘 펜션. 조용한 주택가에 위치해 휴식에 최적입니다.', tel: '063-XXX-XXXX' },
+  { id: 4, name: '월명동 해피하우스', addr: '전북 군산시 월명동 소재', desc: '월명동 중심가에 위치한 접근성 좋은 펜션. 주변에 카페, 식당이 많아 편리합니다.', tel: '063-XXX-XXXX' }
+];
+
+// ===== STATE =====
+const State = {
+  lang: 'en',
+  darkMode: false,
+  autoTTS: false,
+  ttsSpeed: 1,
+  selectedPension: 0,
+  activeScenario: null,
+  isRecording: false,
+  recognition: null,
+  history: []
+};
+
+// ===== UTILITY =====
+function $(sel) { return document.querySelector(sel); }
+function $$(sel) { return document.querySelectorAll(sel); }
+
+function showToast(msg, duration = 2500) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), duration);
+}
+
+function safeStorage(key, val) {
+  try {
+    if (val === undefined) {
+      const v = localStorage.getItem(key);
+      return v ? JSON.parse(v) : null;
+    }
+    localStorage.setItem(key, JSON.stringify(val));
+  } catch(e) { return null; }
+}
+
+function formatTime(d) {
+  const dt = new Date(d);
+  return `${dt.getMonth()+1}/${dt.getDate()} ${dt.getHours().toString().padStart(2,'0')}:${dt.getMinutes().toString().padStart(2,'0')}`;
+}
+
+function getLangName(code) {
+  return {en:'영어',ja:'일본어',zh:'중국어'}[code] || code;
+}
+
+// ===== TTS =====
+function speak(text, langCode) {
+  if (!window.speechSynthesis) { showToast('TTS를 지원하지 않는 브라우저입니다'); return; }
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  const langMap = {en:'en-US',ja:'ja-JP',zh:'zh-CN',ko:'ko-KR'};
+  u.lang = langMap[langCode] || langCode;
+  u.rate = State.ttsSpeed;
+  u.pitch = 1;
+  window.speechSynthesis.speak(u);
+}
+
+// ===== SPEECH RECOGNITION =====
+function initSpeechRecognition() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return null;
+  const r = new SR();
+  r.lang = 'ko-KR';
+  r.interimResults = true;
+  r.continuous = false;
+  r.maxAlternatives = 1;
+
+  r.onresult = (e) => {
+    let transcript = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      transcript += e.results[i][0].transcript;
+    }
+    $('#translateInput').value = transcript;
+    updateCharCount();
+    if (e.results[e.results.length - 1].isFinal) {
+      stopRecording();
+      translateText(transcript);
+    }
+  };
+
+  r.onerror = (e) => {
+    stopRecording();
+    if (e.error === 'no-speech') {
+      showToast('음성이 감지되지 않았습니다');
+    } else if (e.error === 'not-allowed') {
+      showToast('마이크 권한을 허용해 주세요');
+    } else {
+      showToast('음성 인식 오류: ' + e.error);
+    }
+  };
+
+  r.onend = () => { stopRecording(); };
+  return r;
+}
+
+function startRecording() {
+  if (!State.recognition) {
+    State.recognition = initSpeechRecognition();
+    if (!State.recognition) {
+      showToast('이 브라우저에서는 음성 인식을 지원하지 않습니다');
+      return;
+    }
+  }
+  try {
+    State.recognition.start();
+    State.isRecording = true;
+    $('#voiceBtn').classList.add('recording');
+    $('#voiceStatus').textContent = '듣고 있습니다...';
+    $('#voiceStatus').classList.add('active');
+  } catch(e) {
+    showToast('음성 인식 시작 실패');
+  }
+}
+
+function stopRecording() {
+  if (State.recognition && State.isRecording) {
+    try { State.recognition.stop(); } catch(e) {}
+  }
+  State.isRecording = false;
+  $('#voiceBtn').classList.remove('recording');
+  $('#voiceStatus').textContent = '마이크 버튼을 눌러 말씀하세요';
+  $('#voiceStatus').classList.remove('active');
+}
+
+// ===== TRANSLATION =====
+function translateText(text) {
+  if (!text || !text.trim()) return;
+  const lang = State.lang;
+
+  // Try template matching first (offline)
+  const match = findTemplateMatch(text.trim());
+  if (match) {
+    showTranslation(match[lang], text);
+    return;
+  }
+
+  // For custom text: simple dictionary / placeholder
+  // In production, replace this with a real translation API call
+  showTranslation(null, text);
+}
+
+function findTemplateMatch(input) {
+  const normalized = input.replace(/[?.!,\s]/g, '').toLowerCase();
+  for (const cat of Object.values(TEMPLATES)) {
+    for (const p of cat.phrases) {
+      const pNorm = p.ko.replace(/[?.!,\s]/g, '').toLowerCase();
+      // Exact or close match
+      if (pNorm === normalized || pNorm.includes(normalized) || normalized.includes(pNorm)) {
+        return p;
+      }
+    }
+  }
+  // Partial keyword matching
+  if (normalized.length >= 4) {
+    for (const cat of Object.values(TEMPLATES)) {
+      for (const p of cat.phrases) {
+        const pNorm = p.ko.replace(/[?.!,\s]/g, '').toLowerCase();
+        const words = normalized.split('').filter(c => c.trim());
+        let matchCount = 0;
+        for (const w of input.trim().split(/\s+/)) {
+          if (w.length >= 2 && p.ko.includes(w)) matchCount++;
+        }
+        if (matchCount >= 2) return p;
+      }
+    }
+  }
+  return null;
+}
+
+function showTranslation(translatedText, originalText) {
+  const output = $('#translateOutput');
+  if (translatedText) {
+    output.innerHTML = `
+      <div class="translate-output-text">${translatedText}</div>
+      <div class="translate-output-actions">
+        <button class="phrase-btn" onclick="speak('${translatedText.replace(/'/g,"\\'")}','${State.lang}')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/></svg>
+          듣기
+        </button>
+        <button class="phrase-btn" onclick="copyText('${translatedText.replace(/'/g,"\\'")}')">
+          📋 복사
+        </button>
+      </div>
+    `;
+    addHistory(originalText, translatedText, State.lang);
+    if (State.autoTTS) speak(translatedText, State.lang);
+  } else {
+    /* ===== FUTURE API INTEGRATION POINT =====
+     * Replace this block with actual translation API call.
+     * Supported APIs: Google Cloud Translation, DeepL, Papago, etc.
+     *
+     * Example (Google Translate API):
+     * const res = await fetch(`https://translation.googleapis.com/language/translate/v2?key=YOUR_API_KEY`, {
+     *   method: 'POST',
+     *   body: JSON.stringify({ q: originalText, source: 'ko', target: lang, format: 'text' })
+     * });
+     * const data = await res.json();
+     * const translated = data.data.translations[0].translatedText;
+     * showTranslation(translated, originalText);
+     *
+     * Example (Papago API):
+     * const res = await fetch('https://openapi.naver.com/v1/papago/n2mt', { ... });
+     * ===== END API INTEGRATION POINT ===== */
+
+    output.innerHTML = `
+      <div class="translate-output-placeholder" style="color:var(--warning)">
+        ⚠️ 템플릿에 없는 문장입니다.<br>
+        인터넷 연결 시 번역 API를 통해 번역됩니다.<br>
+        <small style="color:var(--text-muted)">현재는 오프라인 템플릿 모드입니다</small>
+      </div>
+    `;
+  }
+}
+
+function copyText(text) {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => showToast('클립보드에 복사되었습니다'));
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('클립보드에 복사되었습니다');
+  }
+}
+
+// ===== HISTORY =====
+function addHistory(ko, trans, lang) {
+  State.history.unshift({ ko, trans, lang, time: Date.now() });
+  if (State.history.length > 100) State.history.pop();
+  safeStorage('pt_history', State.history);
+  renderHistory();
+}
+
+function renderHistory() {
+  const list = $('#historyList');
+  const badge = $('#historyBadge');
+  badge.textContent = State.history.length;
+
+  if (!State.history.length) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📝</div><div class="empty-state-text">아직 대화 기록이 없습니다</div></div>';
+    return;
+  }
+
+  list.innerHTML = State.history.slice(0, 50).map(h => `
+    <div class="history-item">
+      <div class="history-meta"><span>${getLangName(h.lang)}</span><span>${formatTime(h.time)}</span></div>
+      <div class="history-ko">${h.ko}</div>
+      <div class="history-trans">${h.trans}</div>
+    </div>
+  `).join('');
+}
+
+// ===== TEMPLATE RENDERING =====
+function renderTemplates(scenarioKey) {
+  const data = TEMPLATES[scenarioKey];
+  if (!data) return;
+
+  State.activeScenario = scenarioKey;
+  const panel = $('#templatePanel');
+  const title = $('#templateTitle');
+  const list = $('#templateList');
+
+  title.textContent = data.title;
+
+  list.innerHTML = data.phrases.map((p, i) => {
+    const trans = p[State.lang] || p.en;
+    return `
+      <div class="phrase-card" data-scenario="${scenarioKey}" data-index="${i}">
+        <div class="phrase-ko">${p.ko}</div>
+        <div class="phrase-trans">${trans}</div>
+        <div class="phrase-actions">
+          <button class="phrase-btn" onclick="event.stopPropagation();speak('${trans.replace(/'/g,"\\'")}','${State.lang}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/></svg>
+            ${getLangName(State.lang)}로 듣기
+          </button>
+          <button class="phrase-btn" onclick="event.stopPropagation();speak('${p.ko.replace(/'/g,"\\'")}','ko')">
+            🇰🇷 한국어 듣기
+          </button>
+          <button class="phrase-btn" onclick="event.stopPropagation();copyText('${trans.replace(/'/g,"\\'")}')">
+            📋 복사
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  panel.classList.add('active');
+
+  // Update scenario button active state
+  $$('.scenario-card').forEach(c => c.classList.toggle('active', c.dataset.scenario === scenarioKey));
+
+  // Scroll into view
+  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function closeTemplates() {
+  $('#templatePanel').classList.remove('active');
+  State.activeScenario = null;
+  $$('.scenario-card').forEach(c => c.classList.remove('active'));
+}
+
+// ===== PENSION INFO =====
+function renderPensionInfo() {
+  const container = $('#pensionInfoCards');
+  container.innerHTML = PENSIONS.map(p => `
+    <div style="background:var(--surface);border-radius:var(--radius);border:1.5px solid var(--border-light);margin-bottom:12px;overflow:hidden">
+      <div class="pension-info">
+        <div class="pension-info-name">${p.name}</div>
+        <div class="pension-info-addr">📍 ${p.addr}</div>
+        <div class="pension-info-detail">${p.desc}</div>
+        <div style="margin-top:10px;font-size:0.85rem;color:var(--primary);font-weight:600">📞 ${p.tel}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ===== CHAR COUNT =====
+function updateCharCount() {
+  const val = $('#translateInput').value;
+  $('#charCount').textContent = `${val.length}/500`;
+}
+
+// ===== THEME =====
+function setTheme(dark) {
+  State.darkMode = dark;
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : '');
+  $('#themeToggle').textContent = dark ? '☀️' : '🌙';
+  $('#darkModeToggle').checked = dark;
+  safeStorage('pt_dark', dark);
+}
+
+// ===== VIEW SWITCHING =====
+function switchView(viewId) {
+  $$('.view').forEach(v => v.classList.remove('active'));
+  $(`#${viewId}`).classList.add('active');
+  $$('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.view === viewId));
+}
+
+// ===== INIT =====
+function init() {
+  // Load saved state
+  const savedDark = safeStorage('pt_dark');
+  if (savedDark !== null) setTheme(savedDark);
+  else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) setTheme(true);
+
+  const savedLang = safeStorage('pt_lang');
+  if (savedLang) { State.lang = savedLang; $('#langSelect').value = savedLang; }
+
+  const savedAutoTTS = safeStorage('pt_autotts');
+  if (savedAutoTTS !== null) { State.autoTTS = savedAutoTTS; $('#autoTTSToggle').checked = savedAutoTTS; }
+
+  const savedSpeed = safeStorage('pt_speed');
+  if (savedSpeed !== null) { State.ttsSpeed = savedSpeed; $('#ttsSpeed').value = savedSpeed; }
+
+  const savedHistory = safeStorage('pt_history');
+  if (savedHistory) State.history = savedHistory;
+
+  renderHistory();
+  renderPensionInfo();
+
+  // === EVENT LISTENERS ===
+
+  // Language select
+  $('#langSelect').addEventListener('change', (e) => {
+    State.lang = e.target.value;
+    safeStorage('pt_lang', State.lang);
+    showToast(`${getLangName(State.lang)} 모드로 전환됨`);
+    if (State.activeScenario) renderTemplates(State.activeScenario);
+  });
+
+  // Theme toggle
+  $('#themeToggle').addEventListener('click', () => setTheme(!State.darkMode));
+  $('#darkModeToggle').addEventListener('change', (e) => setTheme(e.target.checked));
+
+  // Auto TTS
+  $('#autoTTSToggle').addEventListener('change', (e) => {
+    State.autoTTS = e.target.checked;
+    safeStorage('pt_autotts', State.autoTTS);
+  });
+
+  // TTS Speed
+  $('#ttsSpeed').addEventListener('change', (e) => {
+    State.ttsSpeed = parseFloat(e.target.value);
+    safeStorage('pt_speed', State.ttsSpeed);
+  });
+
+  // Settings modal
+  $('#settingsBtn').addEventListener('click', () => $('#settingsModal').classList.add('active'));
+  $('#settingsModal').addEventListener('click', (e) => {
+    if (e.target === $('#settingsModal')) $('#settingsModal').classList.remove('active');
+  });
+
+  // Scenario cards
+  $$('.scenario-card').forEach(card => {
+    card.addEventListener('click', () => {
+      if (State.activeScenario === card.dataset.scenario) {
+        closeTemplates();
+      } else {
+        renderTemplates(card.dataset.scenario);
+      }
+    });
+  });
+
+  // Template close
+  $('#templateClose').addEventListener('click', closeTemplates);
+
+  // Pension chips
+  $$('.pension-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      $$('.pension-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      State.selectedPension = parseInt(chip.dataset.pension);
+      if (State.selectedPension > 0) {
+        const p = PENSIONS[State.selectedPension - 1];
+        showToast(`${p.name} 선택됨`);
+      }
+    });
+  });
+
+  // Voice button
+  $('#voiceBtn').addEventListener('click', () => {
+    if (State.isRecording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  });
+
+  // Translate input
+  $('#translateInput').addEventListener('input', updateCharCount);
+  $('#translateInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      translateText($('#translateInput').value);
+    }
+  });
+  $('#translateBtn').addEventListener('click', () => {
+    translateText($('#translateInput').value);
+  });
+
+  // History toggle
+  $('#historyToggle').addEventListener('click', () => {
+    $('#historyToggle').classList.toggle('open');
+    $('#historyPanel').classList.toggle('open');
+  });
+
+  // History clear
+  $('#historyClear').addEventListener('click', () => {
+    if (confirm('대화 기록을 모두 삭제하시겠습니까?')) {
+      State.history = [];
+      safeStorage('pt_history', []);
+      renderHistory();
+      showToast('기록이 삭제되었습니다');
+    }
+  });
+
+  // Bottom nav
+  $$('.nav-item').forEach(nav => {
+    nav.addEventListener('click', () => switchView(nav.dataset.view));
+  });
+
+  // Phrase card click -> fill input
+  document.addEventListener('click', (e) => {
+    const card = e.target.closest('.phrase-card');
+    if (card && !e.target.closest('.phrase-btn')) {
+      const scenario = card.dataset.scenario;
+      const index = parseInt(card.dataset.index);
+      const phrase = TEMPLATES[scenario].phrases[index];
+      const trans = phrase[State.lang] || phrase.en;
+      // Speak the translation
+      speak(trans, State.lang);
+      addHistory(phrase.ko, trans, State.lang);
+    }
+  });
+}
+
+// ===== SERVICE WORKER (inline registration) =====
+if ('serviceWorker' in navigator) {
+  // Create a minimal service worker for offline caching
+  const swCode = `
+    const CACHE = 'pension-talk-v1';
+    self.addEventListener('install', e => { self.skipWaiting(); });
+    self.addEventListener('activate', e => { e.waitUntil(clients.claim()); });
+    self.addEventListener('fetch', e => {
+      if (e.request.url.includes('pension') || e.request.method !== 'GET') return;
+      e.respondWith(
+        caches.match(e.request).then(r => r || fetch(e.request).then(res => {
+          const clone = res.clone();
+          caches.open(CACHE).then(c => c.put(e.request, clone));
+          return res;
+        }).catch(() => new Response('오프라인 상태입니다', {status: 503})))
+      );
+    });
+  `;
+  const blob = new Blob([swCode], { type: 'application/javascript' });
+  const swUrl = URL.createObjectURL(blob);
+  navigator.serviceWorker.register(swUrl).catch(() => {});
+}
+
+// ===== Start App =====
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
